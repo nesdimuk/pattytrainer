@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="clasica">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PattyTrainer — Entrenamiento para Mujeres</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ──────────────────────────────────────────── */
+    :root {
+      --burgundy:    #5B313C;
+      --blush:       #E4C9D2;
+      --blush-light: #F0E0E8;
+      --ivory:       #F6F1F2;
+      --espresso:    #24181D;
+      --taupe:       #8A7A80;
+      --terracotta:  #A35A4A;
+      --white:       #FFFFFF;
+
+      --bg-page:    var(--ivory);
+      --bg-section: var(--white);
+      --bg-dark:    var(--espresso);
+      --bg-primary: var(--burgundy);
+      --text-main:  var(--espresso);
+      --text-muted: var(--taupe);
+      --accent:     var(--burgundy);
+      --accent-soft: var(--blush);
+
+      --font-display: 'Cormorant Garamond', serif;
+      --font-body:    'Manrope', sans-serif;
+
+      --max-w:  1380px;
+      --pad-x:  clamp(24px, 6vw, 110px);
+    }
+
+    /* Theme: Editorial (oscura) */
+    [data-theme="editorial"] {
+      --bg-page:    #1A1014;
+      --bg-section: #211419;
+      --bg-dark:    #0E0A0C;
+      --bg-primary: #3A1E27;
+      --text-main:  #F0E8EC;
+      --text-muted: #9A8A90;
+      --accent:     var(--blush);
+      --accent-soft: rgba(228,201,210,0.15);
+    }
+
+    /* Theme: Suave (rosado aéreo) */
+    [data-theme="suave"] {
+      --bg-page:    #FAF6F7;
+      --bg-section: #FFFFFF;
+      --bg-dark:    #3D2128;
+      --bg-primary: var(--terracotta);
+      --text-main:  #2E1A20;
+      --text-muted: #9A808A;
+      --accent:     var(--terracotta);
+      --accent-soft: #F5D9D0;
+    }
+
+    /* ── RESET ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-page);
+      color: var(--text-main);
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; }
+    button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
+
+    /* ── NAV ─────────────────────────────────────────────── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px var(--pad-x);
+      transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
+    }
+    .nav.scrolled {
+      background: rgba(246,241,242,0.94);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(91,49,60,0.1);
+    }
+    [data-theme="editorial"] .nav.scrolled { background: rgba(26,16,20,0.95); }
+    [data-theme="suave"]     .nav.scrolled { background: rgba(250,246,247,0.95); }
+
+    .nav-logo { height: 46px; border-radius: 7px; }
+
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #fff; transition: color 0.2s;
+    }
+    .nav.scrolled .nav-links a { color: var(--text-main); }
+    .nav-links a:hover { color: var(--blush); }
+    .nav.scrolled .nav-links a:hover { color: var(--accent); }
+
+    .nav-cta {
+      display: inline-block; padding: 11px 22px; border-radius: 2px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--accent); color: var(--accent-soft);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .nav-cta:hover { background: var(--espresso); color: var(--blush); transform: translateY(-1px); }
+    [data-theme="editorial"] .nav-cta { color: var(--espresso); }
+
+    /* ── HERO ────────────────────────────────────────────── */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: flex-end; padding-bottom: 100px;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: url('uploads/2.png') center 30% / cover no-repeat;
+      transform: scale(1.04); transition: transform 7s ease;
+    }
+    .hero-bg.ready { transform: scale(1); }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(160deg,
+        rgba(36,24,29,0.08) 0%,
+        rgba(36,24,29,0.15) 35%,
+        rgba(36,24,29,0.55) 65%,
+        rgba(91,49,60,0.88) 100%
+      );
+    }
+    [data-theme="editorial"] .hero-overlay {
+      background: linear-gradient(160deg,
+        rgba(14,10,12,0.2) 0%,
+        rgba(14,10,12,0.4) 50%,
+        rgba(14,10,12,0.85) 100%
+      );
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: var(--max-w); width: 100%;
+      margin: 0 auto; padding: 0 var(--pad-x);
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: end; gap: 60px;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 12px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--blush);
+      margin-bottom: 28px;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.8s ease 0.15s, transform 0.8s ease 0.15s;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: block; width: 32px; height: 1px; background: var(--blush);
+    }
+    .hero-eyebrow.in { opacity: 1; transform: none; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(56px, 7.5vw, 106px);
+      font-weight: 400; line-height: 1.0;
+      color: #fff; max-width: 780px;
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.9s ease 0.35s, transform 0.9s ease 0.35s;
+    }
+    .hero-title em { font-style: italic; color: var(--blush); }
+    .hero-title.in { opacity: 1; transform: none; }
+
+    .hero-sub {
+      font-size: clamp(15px, 1.5vw, 18px); font-weight: 400; line-height: 1.75;
+      color: rgba(246,241,242,0.8); max-width: 480px; margin-top: 28px;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.8s ease 0.55s, transform 0.8s ease 0.55s;
+    }
+    .hero-sub.in { opacity: 1; transform: none; }
+
+    .hero-actions {
+      display: flex; gap: 20px; align-items: center; margin-top: 44px; flex-wrap: wrap;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.8s ease 0.75s, transform 0.8s ease 0.75s;
+    }
+    .hero-actions.in { opacity: 1; transform: none; }
+
+    .btn-hero {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 32px; background: var(--blush); color: var(--burgundy);
+      font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+      border-radius: 2px; transition: all 0.25s ease;
+    }
+    .btn-hero:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(91,49,60,0.25); }
+    [data-theme="editorial"] .btn-hero { color: var(--espresso); }
+
+    .btn-hero-ghost {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(246,241,242,0.85); border-bottom: 1px solid rgba(228,201,210,0.4);
+      padding-bottom: 2px; transition: all 0.2s;
+    }
+    .btn-hero-ghost:hover { color: var(--blush); border-bottom-color: var(--blush); }
+
+    .hero-right {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+      opacity: 0; transition: opacity 0.8s ease 1s;
+    }
+    .hero-right.in { opacity: 1; }
+    .hero-badge {
+      background: rgba(228,201,210,0.12); border: 1px solid rgba(228,201,210,0.25);
+      backdrop-filter: blur(8px); padding: 14px 20px; border-radius: 3px;
+      text-align: right; min-width: 220px;
+    }
+    .hero-badge-num {
+      font-family: var(--font-display); font-size: 44px; font-weight: 300; color: var(--blush); line-height: 1;
+    }
+    .hero-badge-lbl {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(228,201,210,0.65); margin-top: 4px;
+    }
+
+    .hero-scroll-ind {
+      position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+      z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: rgba(228,201,210,0.5); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+    }
+    .scroll-line {
+      width: 1px; height: 52px;
+      background: linear-gradient(to bottom, rgba(228,201,210,0.6), transparent);
+      animation: pulse-line 2s ease-in-out infinite;
+    }
+    @keyframes pulse-line {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.2; }
+    }
+
+    /* ── STRIP ───────────────────────────────────────────── */
+    .strip {
+      background: var(--espresso); padding: 0 var(--pad-x);
+    }
+    [data-theme="editorial"] .strip { background: #0E0A0C; }
+    [data-theme="suave"]     .strip { background: #3D2128; }
+
+    .strip-inner {
+      max-width: var(--max-w); margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid rgba(228,201,210,0.08);
+    }
+    .strip-item {
+      padding: 44px 32px; border-right: 1px solid rgba(228,201,210,0.08);
+    }
+    .strip-item:last-child { border-right: none; }
+    .strip-num {
+      font-family: var(--font-display); font-size: 52px; font-weight: 300; color: var(--blush); line-height: 1;
+    }
+    .strip-lbl {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--taupe); margin-top: 8px;
+    }
+
+    /* ── SECTION BASE ────────────────────────────────────── */
+    .sec { padding: clamp(80px, 10vw, 150px) var(--pad-x); }
+    .sec-inner { max-width: var(--max-w); margin: 0 auto; }
+    .sec-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 16px;
+    }
+    .sec-title {
+      font-family: var(--font-display);
+      font-size: clamp(38px, 4.5vw, 68px);
+      font-weight: 400; line-height: 1.06; color: var(--text-main);
+    }
+    .sec-title em { font-style: italic; color: var(--accent); }
+
+    /* ── HISTORIA ────────────────────────────────────────── */
+    .historia { background: var(--bg-page); }
+    .historia-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center;
+    }
+    .historia-img-wrap { position: relative; }
+    .historia-img {
+      width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: center 30%;
+      display: block;
+    }
+    .historia-deco {
+      position: absolute; top: -18px; right: -18px; bottom: 18px; left: 18px;
+      border: 1px solid var(--accent-soft); pointer-events: none; z-index: -1;
+    }
+    .historia-text { padding-left: 20px; }
+    .historia-quote {
+      font-family: var(--font-display); font-size: clamp(20px, 2vw, 28px);
+      font-style: italic; font-weight: 400; line-height: 1.5;
+      color: var(--accent); margin: 32px 0;
+      padding-left: 24px; border-left: 2px solid var(--accent-soft);
+    }
+    .historia-body {
+      font-size: 16px; line-height: 1.85; color: var(--text-muted); margin-bottom: 18px;
+    }
+    .historia-creds {
+      margin-top: 36px; padding-top: 32px; border-top: 1px solid var(--accent-soft);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .cred {
+      display: flex; align-items: center; gap: 14px;
+      font-size: 14px; font-weight: 500; color: var(--text-main);
+    }
+    .cred-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0;
+    }
+
+    /* ── FILOSOFÍA ───────────────────────────────────────── */
+    .filosofia { background: var(--bg-primary); }
+    [data-theme="suave"] .filosofia { background: var(--terracotta); }
+
+    .filosofia .sec-label { color: rgba(228,201,210,0.5); }
+    .filosofia .sec-title { color: var(--ivory); }
+    .filosofia .sec-title em { color: var(--blush); }
+    [data-theme="editorial"] .filosofia .sec-title em { color: #fff; }
+
+    .fil-intro {
+      font-size: 17px; line-height: 1.8; color: rgba(228,201,210,0.75);
+      max-width: 600px; margin-top: 20px; margin-bottom: 72px;
+    }
+    .pilares {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    }
+    .pilar {
+      padding: 52px 40px; background: rgba(0,0,0,0.2);
+      transition: background 0.3s;
+    }
+    .pilar:hover { background: rgba(0,0,0,0.35); }
+    .pilar-n {
+      font-family: var(--font-display); font-size: 88px; font-weight: 300;
+      color: rgba(228,201,210,0.12); line-height: 1; margin-bottom: -12px;
+    }
+    .pilar-h {
+      font-family: var(--font-display); font-size: 30px; font-weight: 500;
+      color: var(--blush); margin-bottom: 14px;
+    }
+    .pilar-p { font-size: 15px; line-height: 1.8; color: rgba(228,201,210,0.65); }
+
+    /* ── SERVICIOS ───────────────────────────────────────── */
+    .servicios { background: var(--bg-page); }
+    .srv-header {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+      align-items: end; margin-bottom: 72px;
+    }
+    .srv-intro { font-size: 16px; line-height: 1.85; color: var(--text-muted); margin-top: 20px; }
+    .srv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; }
+    .srv-card {
+      background: var(--bg-section); padding: 52px 44px;
+      position: relative; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;
+    }
+    [data-theme="editorial"] .srv-card { background: var(--bg-section); border: 1px solid rgba(228,201,210,0.07); }
+    .srv-card::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: var(--accent-soft); transform: scaleX(0); transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+    .srv-card:hover::after { transform: scaleX(1); }
+    .srv-card:hover { transform: translateY(-4px); box-shadow: 0 24px 60px rgba(91,49,60,0.1); }
+    [data-theme="editorial"] .srv-card:hover { box-shadow: 0 24px 60px rgba(0,0,0,0.4); }
+
+    .srv-tag {
+      display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
+      padding: 4px 10px; border: 1px solid var(--accent-soft); border-radius: 1px;
+    }
+    .srv-h {
+      font-family: var(--font-display); font-size: 28px; font-weight: 500;
+      color: var(--text-main); margin-bottom: 14px; line-height: 1.2;
+    }
+    .srv-p { font-size: 15px; line-height: 1.8; color: var(--text-muted); margin-bottom: 28px; }
+    .srv-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); transition: gap 0.2s;
+    }
+    .srv-link:hover { gap: 16px; }
+
+    /* ── TESTIMONIOS ─────────────────────────────────────── */
+    .testimonios { background: var(--bg-dark); padding: clamp(80px,10vw,150px) var(--pad-x); }
+    .testimonios .sec-label { color: rgba(228,201,210,0.4); }
+    .testimonios .sec-title { color: var(--ivory); }
+    .testimonios .sec-title em { color: var(--blush); }
+    .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 72px; }
+    .test-card {
+      padding: 52px 40px; background: rgba(228,201,210,0.04);
+      border-top: 1px solid rgba(228,201,210,0.1);
+      transition: background 0.3s;
+    }
+    .test-card:hover { background: rgba(228,201,210,0.07); }
+    .test-open {
+      font-family: var(--font-display); font-size: 72px; color: var(--blush);
+      opacity: 0.25; line-height: 0.6; margin-bottom: 20px;
+    }
+    .test-text {
+      font-family: var(--font-display); font-size: 19px; font-style: italic;
+      line-height: 1.75; color: var(--ivory); margin-bottom: 28px;
+    }
+    .test-name { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blush); }
+    .test-detail { font-size: 12px; color: var(--taupe); margin-top: 4px; }
+
+    /* ── CONTACTO ────────────────────────────────────────── */
+    .contacto { background: var(--bg-page); }
+    .contacto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 110px; align-items: start; }
+    .contacto-text {
+      font-size: 17px; line-height: 1.85; color: var(--text-muted); margin-top: 22px; margin-bottom: 44px;
+    }
+    .socials { display: flex; flex-direction: column; gap: 12px; }
+    .social-btn {
+      display: flex; align-items: center; gap: 18px;
+      padding: 16px 20px; background: var(--bg-section);
+      font-size: 14px; font-weight: 500; color: var(--text-main);
+      border-radius: 2px; transition: all 0.25s;
+    }
+    [data-theme="editorial"] .social-btn { border: 1px solid rgba(228,201,210,0.07); }
+    .social-btn:hover { background: var(--accent); color: var(--blush); transform: translateX(6px); }
+    .social-icon {
+      width: 38px; height: 38px; border-radius: 2px; flex-shrink: 0;
+      background: var(--accent-soft); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700;
+    }
+    .social-btn:hover .social-icon { background: rgba(228,201,210,0.15); color: var(--blush); }
+
+    /* form */
+    .form-wrap { display: flex; flex-direction: column; gap: 18px; }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
+    }
+    .form-input {
+      font-family: var(--font-body); font-size: 15px;
+      padding: 15px 18px; border: 1px solid rgba(138,122,128,0.25);
+      background: var(--bg-section); color: var(--text-main); border-radius: 2px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: rgba(138,122,128,0.5); }
+    textarea.form-input { resize: vertical; min-height: 130px; }
+    .form-submit {
+      font-family: var(--font-body); font-size: 12px; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--accent); color: var(--accent-soft);
+      padding: 17px 36px; border-radius: 2px; transition: all 0.25s;
+    }
+    .form-submit:hover { background: var(--espresso); color: var(--blush); }
+    [data-theme="editorial"] .form-submit:hover { background: #fff; color: var(--espresso); }
+    .form-note { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── FOOTER ──────────────────────────────────────────── */
+    .footer { background: var(--espresso); padding: 52px var(--pad-x); }
+    [data-theme="editorial"] .footer { background: #0E0A0C; }
+    .footer-inner {
+      max-width: var(--max-w); margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap;
+    }
+    .footer-logo { height: 44px; border-radius: 6px; }
+    .footer-nav { display: flex; gap: 28px; list-style: none; flex-wrap: wrap; }
+    .footer-nav a {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--taupe); transition: color 0.2s;
+    }
+    .footer-nav a:hover { color: var(--blush); }
+    .footer-copy { font-size: 12px; color: var(--taupe); }
+
+    /* ── SCROLL ANIMATIONS ───────────────────────────────── */
+    .fade-up {
+      opacity: 0; transform: translateY(36px);
+      transition: opacity 0.75s ease, transform 0.75s ease;
+    }
+    .fade-up.vis { opacity: 1; transform: none; }
+    .fade-up:nth-child(2) { transition-delay: 0.1s; }
+    .fade-up:nth-child(3) { transition-delay: 0.2s; }
+    .fade-up:nth-child(4) { transition-delay: 0.3s; }
+    .fade-up:nth-child(5) { transition-delay: 0.4s; }
+
+    /* ── TWEAKS PANEL ────────────────────────────────────── */
+    .tp {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      width: 260px; background: #fff; border-radius: 10px;
+      box-shadow: 0 8px 40px rgba(36,24,29,0.22);
+      overflow: hidden; display: none; font-family: var(--font-body);
+    }
+    .tp.open { display: block; }
+    .tp-head {
+      background: var(--burgundy); color: var(--blush);
+      padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+    }
+    .tp-close { color: var(--blush); font-size: 20px; line-height: 1; opacity: 0.8; transition: opacity 0.2s; }
+    .tp-close:hover { opacity: 1; }
+    .tp-body { padding: 18px; display: flex; flex-direction: column; gap: 20px; }
+    .tp-group { display: flex; flex-direction: column; gap: 9px; }
+    .tp-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #9A8A90; }
+    .tp-opts { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tp-opt {
+      padding: 7px 13px; border: 1px solid #e0d8dc; border-radius: 2px;
+      font-size: 12px; font-weight: 500; color: #24181D; transition: all 0.18s;
+    }
+    .tp-opt.on { background: var(--burgundy); color: var(--blush); border-color: var(--burgundy); }
+    .tp-swatch {
+      width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tp-swatch.on { border-color: #24181D; transform: scale(1.2); }
+
+    /* ── TWEAKS TOGGLE BTN ───────────────────────────────── */
+    .tp-toggle {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9998;
+      background: var(--burgundy); color: var(--blush);
+      padding: 10px 18px; border-radius: 24px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      box-shadow: 0 4px 20px rgba(36,24,29,0.25);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .tp-toggle:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(36,24,29,0.3); }
+    .tp.open + .tp-toggle { display: none; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 960px) {
+      .nav-links { display: none; }
+      .hero-content { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .strip-inner { grid-template-columns: repeat(2, 1fr); }
+      .historia-grid,
+      .srv-header,
+      .contacto-grid { grid-template-columns: 1fr; gap: 48px; }
+      .historia-text { padding-left: 0; }
+      .pilares { grid-template-columns: 1fr; }
+      .srv-grid { grid-template-columns: 1fr; }
+      .test-grid { grid-template-columns: 1fr; }
+      .footer-inner { justify-content: center; text-align: center; }
+    }
+    @media (max-width: 560px) {
+      .strip-inner { grid-template-columns: 1fr 1fr; }
+      .hero-title { font-size: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────── -->
+<header class="nav" id="nav">
+  <a href="#inicio">
+    <img src="uploads/patty-logo.png" alt="PattyTrainer" class="nav-logo">
+  </a>
+  <ul class="nav-links">
+    <li><a href="#historia">Mi historia</a></li>
+    <li><a href="#filosofia">Filosofía</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <a href="#servicios" class="nav-cta">Conoce mis programas</a>
+</header>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section class="hero" id="inicio">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-left">
+      <p class="hero-eyebrow" id="eyebrow">Patricia Ramírez Oróstica &nbsp;·&nbsp; Entrenadora Personal</p>
+      <h1 class="hero-title" id="heroTitle">
+        Entrenamiento<br>para mujeres<br>con <em>sentido</em>
+      </h1>
+      <p class="hero-sub" id="heroSub">
+        Acompaño a mujeres que quieren volver a moverse, recuperar energía y construir bienestar desde un espacio profesional, cercano y humano.
+      </p>
+      <div class="hero-actions" id="heroActs">
+        <a href="#servicios" class="btn-hero">Conoce mis programas &darr;</a>
+        <a href="#contacto" class="btn-hero-ghost">Agenda una conversación</a>
+      </div>
+    </div>
+    <div class="hero-right" id="heroBadges">
+      <div class="hero-badge">
+        <div class="hero-badge-num">20+</div>
+        <div class="hero-badge-lbl">Años de experiencia</div>
+      </div>
+      <div class="hero-badge">
+        <div class="hero-badge-num">Magíster</div>
+        <div class="hero-badge-lbl">Entrenamiento Deportivo</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll-ind">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- ── STRIP ─────────────────────────────────────────────── -->
+<div class="strip">
+  <div class="strip-inner">
+    <div class="strip-item fade-up">
+      <div class="strip-num">20+</div>
+      <div class="strip-lbl">Años de experiencia</div>
+    </div>
+    <div class="strip-item fade-up">
+      <div class="strip-num">100+</div>
+      <div class="strip-lbl">Alumnas acompañadas</div>
+    </div>
+    <div class="strip-item fade-up">
+      <div class="strip-num">Magíster</div>
+      <div class="strip-lbl">Entrenamiento deportivo</div>
+    </div>
+    <div class="strip-item fade-up">
+      <div class="strip-num">3</div>
+      <div class="strip-lbl">Modalidades de trabajo</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HISTORIA ───────────────────────────────────────────── -->
+<section class="sec historia" id="historia">
+  <div class="sec-inner">
+    <div class="historia-grid">
+      <div class="historia-img-wrap fade-up">
+        <img src="uploads/Captura de pantalla 2026-05-10 a la(s) 11.14.45 a.m..png" alt="Patricia entrenando" class="historia-img">
+        <div class="historia-deco"></div>
+      </div>
+      <div class="historia-text">
+        <p class="sec-label fade-up">Mi historia</p>
+        <h2 class="sec-title fade-up">Un método que<br>nació <em>viviéndolo</em></h2>
+        <blockquote class="historia-quote fade-up">
+          "Mi forma de acompañar nace tanto de mi formación como de mi propia historia en el deporte."
+        </blockquote>
+        <p class="historia-body fade-up">
+          Soy Patricia Ramírez Oróstica. Empecé en el deporte siendo niña y esa historia no se interrumpió jamás: competí, me formé, seguí aprendiendo — y hoy entrego todo eso en cada proceso que acompaño.
+        </p>
+        <p class="historia-body fade-up">
+          Creo que moverse no debería sentirse como castigo. El entrenamiento es un espacio para recuperar energía, soltar el peso del día y reconectar con una misma. Eso es lo que construimos juntas.
+        </p>
+        <div class="historia-creds fade-up">
+          <div class="cred"><div class="cred-dot"></div>Magíster en Entrenamiento Deportivo</div>
+          <div class="cred"><div class="cred-dot"></div>Licenciada en Educación Física</div>
+          <div class="cred"><div class="cred-dot"></div>Profesora de Educación Física</div>
+          <div class="cred"><div class="cred-dot"></div>Historial deportivo competitivo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FILOSOFÍA ──────────────────────────────────────────── -->
+<section class="sec filosofia" id="filosofia">
+  <div class="sec-inner">
+    <p class="sec-label fade-up">Filosofía</p>
+    <h2 class="sec-title fade-up">Tres pilares que<br>guían <em>cada proceso</em></h2>
+    <p class="fil-intro fade-up">
+      Creo en un entrenamiento que no solo fortalece el cuerpo. También ordena, contiene y acompaña. Estos son los pilares que sostienen mi forma de trabajar.
+    </p>
+    <div class="pilares">
+      <div class="pilar fade-up">
+        <div class="pilar-n">01</div>
+        <h3 class="pilar-h">Entrenar con propósito</h3>
+        <p class="pilar-p">Cada sesión tiene una razón. No entrenamos por obligación ni solo por apariencia: entrenamos para reconectar con la energía, la constancia y la fuerza que ya está en ti.</p>
+      </div>
+      <div class="pilar fade-up">
+        <div class="pilar-n">02</div>
+        <h3 class="pilar-h">Acompañar con humanidad</h3>
+        <p class="pilar-p">El entrenamiento es un vínculo real. Hay espacio para respirar, reírse y también cansarse. Acompaño con presencia genuina, no solo con rutinas.</p>
+      </div>
+      <div class="pilar fade-up">
+        <div class="pilar-n">03</div>
+        <h3 class="pilar-h">Bienestar sostenible</h3>
+        <p class="pilar-p">No busco resultados rápidos sino procesos que duren. La constancia es un vínculo compartido — no un castigo — y el bienestar que construimos juntas no se pierde.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SERVICIOS ──────────────────────────────────────────── -->
+<section class="sec servicios" id="servicios">
+  <div class="sec-inner">
+    <div class="srv-header">
+      <div>
+        <p class="sec-label fade-up">Servicios</p>
+        <h2 class="sec-title fade-up">Cómo podemos<br><em>trabajar juntas</em></h2>
+      </div>
+      <p class="srv-intro fade-up">
+        Tengo distintas formas de acompañarte, según tu rutina, tus tiempos y lo que necesites. Todos los programas se adaptan a tu proceso.
+      </p>
+    </div>
+    <div class="srv-grid">
+      <div class="srv-card fade-up">
+        <div class="srv-tag">Online</div>
+        <h3 class="srv-h">Entrenamiento Online</h3>
+        <p class="srv-p">Acompañamiento completo a distancia con plan personalizado, seguimiento regular y comunicación directa. Para quienes necesitan flexibilidad sin sacrificar guía ni resultados.</p>
+        <a href="#contacto" class="srv-link">Consultar &rarr;</a>
+      </div>
+      <div class="srv-card fade-up">
+        <div class="srv-tag">Presencial</div>
+        <h3 class="srv-h">Entrenamiento Presencial</h3>
+        <p class="srv-p">Sesiones individuales con presencia y guía directa. Corrección técnica, motivación y la energía de entrenar con alguien que te ve, te escucha y te acompaña de verdad.</p>
+        <a href="#contacto" class="srv-link">Consultar &rarr;</a>
+      </div>
+      <div class="srv-card fade-up">
+        <div class="srv-tag">Plan personalizado</div>
+        <h3 class="srv-h">Plan a Tu Medida</h3>
+        <p class="srv-p">Plan diseñado específicamente para ti, con objetivos claros, progresión estructurada y ajustes continuos. Para quienes quieren autonomía con estructura real detrás.</p>
+        <a href="#contacto" class="srv-link">Consultar &rarr;</a>
+      </div>
+      <div class="srv-card fade-up">
+        <div class="srv-tag">Acompañamiento</div>
+        <h3 class="srv-h">Constancia y Bienestar</h3>
+        <p class="srv-p">Para quienes necesitan apoyo para mantenerse, encontrar su ritmo y construir un hábito sostenible. Foco en el proceso y el bienestar integral, no solo en el rendimiento.</p>
+        <a href="#contacto" class="srv-link">Consultar &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIOS ─────────────────────────────────────────── -->
+<section class="testimonios" id="testimonios">
+  <div class="sec-inner" style="max-width:var(--max-w);margin:0 auto;">
+    <p class="sec-label fade-up">Lo que dicen ellas</p>
+    <h2 class="sec-title fade-up">Mujeres que ya<br><em>dieron el paso</em></h2>
+    <div class="test-grid">
+      <div class="test-card fade-up">
+        <div class="test-open">"</div>
+        <p class="test-text">Empecé sin creer demasiado en mí misma. Patty me hizo darme cuenta de que el límite no era mi cuerpo, era mi cabeza. Hoy entreno hace un año y no lo dejo.</p>
+        <div class="test-name">Valentina M.</div>
+        <div class="test-detail">Entrenamiento online · 12 meses</div>
+      </div>
+      <div class="test-card fade-up">
+        <div class="test-open">"</div>
+        <p class="test-text">No es solo una entrenadora. Es alguien que te ve, te escucha y adapta todo a tu vida real. Con ella, entrenar dejó de sentirse como un sacrificio.</p>
+        <div class="test-name">Camila R.</div>
+        <div class="test-detail">Entrenamiento presencial · 8 meses</div>
+      </div>
+      <div class="test-card fade-up">
+        <div class="test-open">"</div>
+        <p class="test-text">Llegué buscando perder peso. Me quedé porque encontré constancia, energía y algo que nunca esperé: ganas de seguir. Gracias, Patty.</p>
+        <div class="test-name">Andrea S.</div>
+        <div class="test-detail">Plan personalizado · 6 meses</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACTO ────────────────────────────────────────────── -->
+<section class="sec contacto" id="contacto">
+  <div class="sec-inner">
+    <div class="contacto-grid">
+      <div>
+        <p class="sec-label fade-up">Conversemos</p>
+        <h2 class="sec-title fade-up">Tu primera<br>conversación es<br><em>sin compromiso</em></h2>
+        <p class="contacto-text fade-up">
+          El primer paso es simple: cuéntame dónde estás, qué buscas y cómo puedo acompañarte. Respondo personalmente.
+        </p>
+        <div class="socials fade-up">
+          <a href="https://instagram.com/pattytrainer" target="_blank" rel="noopener" class="social-btn">
+            <div class="social-icon">IG</div>
+            <span>@pattytrainer en Instagram</span>
+          </a>
+          <a href="https://wa.me/56900000000" target="_blank" rel="noopener" class="social-btn">
+            <div class="social-icon">WA</div>
+            <span>WhatsApp directo</span>
+          </a>
+          <a href="https://linkedin.com/in/patriciaramirezoro" target="_blank" rel="noopener" class="social-btn">
+            <div class="social-icon">in</div>
+            <span>LinkedIn profesional</span>
+          </a>
+        </div>
+      </div>
+      <div class="fade-up">
+        <form class="form-wrap" id="contactForm">
+          <div class="form-group">
+            <label class="form-label" for="nombre">Tu nombre</label>
+            <input class="form-input" type="text" id="nombre" placeholder="¿Cómo te llamas?">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="contacto-medio">Email o WhatsApp</label>
+            <input class="form-input" type="text" id="contacto-medio" placeholder="Para poder responderte">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="interes">¿Qué te interesa?</label>
+            <select class="form-input" id="interes">
+              <option value="" disabled selected>Selecciona una opción</option>
+              <option>Entrenamiento online</option>
+              <option>Entrenamiento presencial</option>
+              <option>Plan personalizado</option>
+              <option>Acompañamiento y constancia</option>
+              <option>No sé todavía</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="mensaje">¿Qué buscas?</label>
+            <textarea class="form-input" id="mensaje" placeholder="Cuéntame un poco sobre ti y qué te motivó a escribir..."></textarea>
+          </div>
+          <button type="submit" class="form-submit" id="submitBtn">Enviar mensaje &rarr;</button>
+          <p class="form-note">Respondo en menos de 24 horas.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <img src="uploads/patty-logo.png" alt="PattyTrainer" class="footer-logo">
+    <ul class="footer-nav">
+      <li><a href="#historia">Mi historia</a></li>
+      <li><a href="#filosofia">Filosofía</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#testimonios">Testimonios</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 PattyTrainer. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<!-- ── TWEAKS PANEL ────────────────────────────────────────── -->
+<div class="tp" id="tpanel">
+  <div class="tp-head">
+    Tweaks
+    <button class="tp-close" id="tpClose">×</button>
+  </div>
+  <div class="tp-body">
+    <div class="tp-group">
+      <div class="tp-lbl">Estilo visual</div>
+      <div class="tp-opts" id="themeOpts">
+        <button class="tp-opt on" data-theme="clasica">Clásica</button>
+        <button class="tp-opt" data-theme="editorial">Editorial</button>
+        <button class="tp-opt" data-theme="suave">Suave</button>
+      </div>
+    </div>
+    <div class="tp-group">
+      <div class="tp-lbl">Tipografía</div>
+      <div class="tp-opts" id="fontOpts">
+        <button class="tp-opt on" data-font="cormorant">Cormorant</button>
+        <button class="tp-opt" data-font="playfair">Playfair</button>
+      </div>
+    </div>
+    <div class="tp-group">
+      <div class="tp-lbl">Color principal</div>
+      <div class="tp-opts" id="accentOpts">
+        <div class="tp-swatch on" style="background:#5B313C" data-c="#5B313C" title="Burdeo"></div>
+        <div class="tp-swatch" style="background:#A35A4A" data-c="#A35A4A" title="Terracota"></div>
+        <div class="tp-swatch" style="background:#3D5A80" data-c="#3D5A80" title="Azul ciruela"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<button class="tp-toggle" id="tpToggle">Tweaks</button>
+
+<script>
+  /* ── TWEAKS TOGGLE ──────────────────────────────────── */
+  document.getElementById('tpToggle').addEventListener('click', () => {
+    document.getElementById('tpanel').classList.add('open');
+  });
+  document.getElementById('tpClose').addEventListener('click', () => {
+    document.getElementById('tpanel').classList.remove('open');
+  });
+
+  /* Theme toggle */
+  document.getElementById('themeOpts').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-theme]');
+    if (!btn) return;
+    document.querySelectorAll('#themeOpts .tp-opt').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    document.documentElement.dataset.theme = btn.dataset.theme;
+    updateNav();
+  });
+
+  /* Font toggle */
+  document.getElementById('fontOpts').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-font]');
+    if (!btn) return;
+    document.querySelectorAll('#fontOpts .tp-opt').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    const map = {
+      cormorant: "'Cormorant Garamond', serif",
+      playfair:  "'Playfair Display', serif"
+    };
+    document.documentElement.style.setProperty('--font-display', map[btn.dataset.font]);
+  });
+
+  /* Accent color swatches */
+  document.getElementById('accentOpts').addEventListener('click', (e) => {
+    const sw = e.target.closest('[data-c]');
+    if (!sw) return;
+    document.querySelectorAll('#accentOpts .tp-swatch').forEach(s => s.classList.remove('on'));
+    sw.classList.add('on');
+    document.documentElement.style.setProperty('--burgundy', sw.dataset.c);
+  });
+
+  /* ── NAV SCROLL ────────────────────────────────────── */
+  const nav = document.getElementById('nav');
+  function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 60); }
+  window.addEventListener('scroll', updateNav, { passive: true });
+
+  /* ── HERO ENTRANCE ─────────────────────────────────── */
+  window.addEventListener('load', () => {
+    document.getElementById('heroBg').classList.add('ready');
+    const delay = (el, ms) => setTimeout(() => el.classList.add('in'), ms);
+    delay(document.getElementById('eyebrow'),   200);
+    delay(document.getElementById('heroTitle'), 380);
+    delay(document.getElementById('heroSub'),   560);
+    delay(document.getElementById('heroActs'),  740);
+    delay(document.getElementById('heroBadges'),920);
+  });
+
+  /* ── SCROLL ANIMATIONS ─────────────────────────────── */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+  /* ── FORM SUBMIT ───────────────────────────────────── */
+  document.getElementById('contactForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.textContent = '¡Enviado! Te escribiré pronto.';
+    btn.style.background = '#2d6a4f';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = 'Enviar mensaje →';
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 5000);
+  });
+</script>
+</body>
+</html>
