@@ -116,7 +116,7 @@
     }
     .hero-bg {
       position: absolute; inset: 0;
-      background: url('uploads/1.png') center 15% / cover no-repeat;
+      background: url('uploads/2.png') center 30% / cover no-repeat;
       transform: scale(1.04); transition: transform 7s ease;
     }
     .hero-bg.ready { transform: scale(1); }
@@ -144,7 +144,6 @@
       display: grid; grid-template-columns: 1fr auto;
       align-items: end; gap: 60px;
     }
-    .hero-left {}
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 12px;
       font-size: 11px; font-weight: 700; letter-spacing: 0.25em;
@@ -504,6 +503,18 @@
     }
     .tp-swatch.on { border-color: #24181D; transform: scale(1.2); }
 
+    /* ── TWEAKS TOGGLE BTN ───────────────────────────────── */
+    .tp-toggle {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9998;
+      background: var(--burgundy); color: var(--blush);
+      padding: 10px 18px; border-radius: 24px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      box-shadow: 0 4px 20px rgba(36,24,29,0.25);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .tp-toggle:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(36,24,29,0.3); }
+    .tp.open + .tp-toggle { display: none; }
+
     /* ── RESPONSIVE ──────────────────────────────────────── */
     @media (max-width: 960px) {
       .nav-links { display: none; }
@@ -561,11 +572,11 @@
     </div>
     <div class="hero-right" id="heroBadges">
       <div class="hero-badge">
-        <div class="hero-badge-num">10+</div>
+        <div class="hero-badge-num">20+</div>
         <div class="hero-badge-lbl">Años de experiencia</div>
       </div>
       <div class="hero-badge">
-        <div class="hero-badge-num">Mgíster</div>
+        <div class="hero-badge-num">Magíster</div>
         <div class="hero-badge-lbl">Entrenamiento Deportivo</div>
       </div>
     </div>
@@ -580,7 +591,7 @@
 <div class="strip">
   <div class="strip-inner">
     <div class="strip-item fade-up">
-      <div class="strip-num">10+</div>
+      <div class="strip-num">20+</div>
       <div class="strip-lbl">Años de experiencia</div>
     </div>
     <div class="strip-item fade-up">
@@ -588,7 +599,7 @@
       <div class="strip-lbl">Alumnas acompañadas</div>
     </div>
     <div class="strip-item fade-up">
-      <div class="strip-num">Mgíster</div>
+      <div class="strip-num">Magíster</div>
       <div class="strip-lbl">Entrenamiento deportivo</div>
     </div>
     <div class="strip-item fade-up">
@@ -603,7 +614,7 @@
   <div class="sec-inner">
     <div class="historia-grid">
       <div class="historia-img-wrap fade-up">
-        <img src="uploads/2.png" alt="Patricia entrenando" class="historia-img">
+        <img src="uploads/Captura de pantalla 2026-05-10 a la(s) 11.14.45 a.m..png" alt="Patricia entrenando" class="historia-img">
         <div class="historia-deco"></div>
       </div>
       <div class="historia-text">
@@ -831,24 +842,15 @@
     </div>
   </div>
 </div>
+<button class="tp-toggle" id="tpToggle">Tweaks</button>
 
 <script>
-  /* ── TWEAKS PROTOCOL ───────────────────────────────── */
-  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-    "theme": "editorial",
-    "font": "cormorant",
-    "accentColor": "#5B313C"
-  }/*EDITMODE-END*/;
-
-  window.addEventListener('message', (e) => {
-    if (e.data?.type === '__activate_edit_mode')   document.getElementById('tpanel').classList.add('open');
-    if (e.data?.type === '__deactivate_edit_mode') document.getElementById('tpanel').classList.remove('open');
+  /* ── TWEAKS TOGGLE ──────────────────────────────────── */
+  document.getElementById('tpToggle').addEventListener('click', () => {
+    document.getElementById('tpanel').classList.add('open');
   });
-  window.parent.postMessage({ type: '__edit_mode_available' }, '*');
-
   document.getElementById('tpClose').addEventListener('click', () => {
     document.getElementById('tpanel').classList.remove('open');
-    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
   });
 
   /* Theme toggle */
@@ -857,11 +859,8 @@
     if (!btn) return;
     document.querySelectorAll('#themeOpts .tp-opt').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
-    const t = btn.dataset.theme;
-    document.documentElement.dataset.theme = t;
-    // update nav appearance for current scroll
+    document.documentElement.dataset.theme = btn.dataset.theme;
     updateNav();
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: t } }, '*');
   });
 
   /* Font toggle */
@@ -870,13 +869,11 @@
     if (!btn) return;
     document.querySelectorAll('#fontOpts .tp-opt').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
-    const f = btn.dataset.font;
     const map = {
       cormorant: "'Cormorant Garamond', serif",
       playfair:  "'Playfair Display', serif"
     };
-    document.documentElement.style.setProperty('--font-display', map[f]);
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { font: f } }, '*');
+    document.documentElement.style.setProperty('--font-display', map[btn.dataset.font]);
   });
 
   /* Accent color swatches */
@@ -885,27 +882,8 @@
     if (!sw) return;
     document.querySelectorAll('#accentOpts .tp-swatch').forEach(s => s.classList.remove('on'));
     sw.classList.add('on');
-    const c = sw.dataset.c;
-    document.documentElement.style.setProperty('--burgundy', c);
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { accentColor: c } }, '*');
+    document.documentElement.style.setProperty('--burgundy', sw.dataset.c);
   });
-
-  /* Apply saved defaults */
-  (() => {
-    if (TWEAK_DEFAULTS.theme && TWEAK_DEFAULTS.theme !== 'clasica') {
-      document.documentElement.dataset.theme = TWEAK_DEFAULTS.theme;
-      document.querySelectorAll('#themeOpts .tp-opt').forEach(b => {
-        b.classList.toggle('on', b.dataset.theme === TWEAK_DEFAULTS.theme);
-      });
-    }
-    if (TWEAK_DEFAULTS.font && TWEAK_DEFAULTS.font !== 'cormorant') {
-      const map = { playfair: "'Playfair Display', serif" };
-      if (map[TWEAK_DEFAULTS.font]) document.documentElement.style.setProperty('--font-display', map[TWEAK_DEFAULTS.font]);
-    }
-    if (TWEAK_DEFAULTS.accentColor && TWEAK_DEFAULTS.accentColor !== '#5B313C') {
-      document.documentElement.style.setProperty('--burgundy', TWEAK_DEFAULTS.accentColor);
-    }
-  })();
 
   /* ── NAV SCROLL ────────────────────────────────────── */
   const nav = document.getElementById('nav');
