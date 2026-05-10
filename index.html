@@ -750,15 +750,15 @@
           El primer paso es simple: cuéntame dónde estás, qué buscas y cómo puedo acompañarte. Respondo personalmente.
         </p>
         <div class="socials fade-up">
-          <a href="https://instagram.com/pattytrainer" target="_blank" rel="noopener" class="social-btn">
+          <a href="https://instagram.com/pattytrainer_" target="_blank" rel="noopener" class="social-btn">
             <div class="social-icon">IG</div>
-            <span>@pattytrainer en Instagram</span>
+            <span>@pattytrainer_ en Instagram</span>
           </a>
-          <a href="https://wa.me/56900000000" target="_blank" rel="noopener" class="social-btn">
+          <a href="https://wa.me/56985292909" target="_blank" rel="noopener" class="social-btn">
             <div class="social-icon">WA</div>
-            <span>WhatsApp directo</span>
+            <span>+56 9 8529 2909 en WhatsApp</span>
           </a>
-          <a href="https://linkedin.com/in/patriciaramirezoro" target="_blank" rel="noopener" class="social-btn">
+          <a href="https://www.linkedin.com/in/patriciaramirezorostica/" target="_blank" rel="noopener" class="social-btn">
             <div class="social-icon">in</div>
             <span>LinkedIn profesional</span>
           </a>
@@ -789,8 +789,8 @@
             <label class="form-label" for="mensaje">¿Qué buscas?</label>
             <textarea class="form-input" id="mensaje" placeholder="Cuéntame un poco sobre ti y qué te motivó a escribir..."></textarea>
           </div>
-          <button type="submit" class="form-submit" id="submitBtn">Enviar mensaje &rarr;</button>
-          <p class="form-note">Respondo en menos de 24 horas.</p>
+          <button type="submit" class="form-submit" id="submitBtn">Enviar por WhatsApp &rarr;</button>
+          <p class="form-note">Al hacer clic se abrirá WhatsApp con tu mensaje listo para enviar.</p>
         </form>
       </div>
     </div>
@@ -911,18 +911,26 @@
   }, { threshold: 0.12 });
   document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
 
-  /* ── FORM SUBMIT ───────────────────────────────────── */
+  /* ── FORM SUBMIT → WHATSAPP ────────────────────────── */
   document.getElementById('contactForm').addEventListener('submit', (e) => {
     e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    btn.textContent = '¡Enviado! Te escribiré pronto.';
-    btn.style.background = '#2d6a4f';
-    btn.disabled = true;
-    setTimeout(() => {
-      btn.textContent = 'Enviar mensaje →';
-      btn.style.background = '';
-      btn.disabled = false;
-    }, 5000);
+    const nombre  = document.getElementById('nombre').value.trim();
+    const contacto = document.getElementById('contacto-medio').value.trim();
+    const interes = document.getElementById('interes').value;
+    const mensaje = document.getElementById('mensaje').value.trim();
+
+    const texto = [
+      `Hola Patricia, te escribo desde tu web 👋`,
+      ``,
+      `*Nombre:* ${nombre || '—'}`,
+      `*Contacto:* ${contacto || '—'}`,
+      `*Me interesa:* ${interes || '—'}`,
+      ``,
+      `*Lo que busco:*`,
+      mensaje || '—',
+    ].join('\n');
+
+    window.open(`https://wa.me/56985292909?text=${encodeURIComponent(texto)}`, '_blank');
   });
 </script>
 </body>
