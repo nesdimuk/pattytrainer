@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="clasica">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Alumnas — PattyTrainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --burgundy:    #5B313C;
+      --blush:       #E4C9D2;
+      --blush-light: #F0E0E8;
+      --ivory:       #F6F1F2;
+      --espresso:    #24181D;
+      --taupe:       #8A7A80;
+      --white:       #FFFFFF;
+      --accent:      var(--burgundy);
+      --accent-soft: var(--blush);
+      --text-main:   var(--espresso);
+      --text-muted:  var(--taupe);
+      --bg-page:     var(--ivory);
+      --font-display: 'Cormorant Garamond', serif;
+      --font-body:    'Manrope', sans-serif;
+      --pad-x: clamp(24px, 6vw, 110px);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px var(--pad-x);
+      background: rgba(246,241,242,0.96);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(91,49,60,0.1);
+    }
+    .nav-logo { height: 46px; border-radius: 7px; }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-main); transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-back {
+      display: inline-block; padding: 11px 22px; border-radius: 2px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--accent); color: var(--accent-soft);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .nav-back:hover { background: var(--espresso); color: var(--blush); transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+    }
+
+    /* HERO PORTAL */
+    .portal-hero {
+      padding: 60px var(--pad-x) 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--blush);
+    }
+    .portal-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 400;
+      color: var(--accent);
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+    }
+    .portal-hero p {
+      font-size: 15px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* PORTAL CONTAINER */
+    .portal-wrap {
+      flex: 1;
+      padding: 48px var(--pad-x) 72px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    #ptd_portal {
+      min-height: 600px;
+      width: 100%;
+    }
+
+    /* FOOTER */
+    .footer-mini {
+      text-align: center;
+      padding: 28px var(--pad-x);
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      border-top: 1px solid var(--blush);
+    }
+    .footer-mini a { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <a href="/">
+    <img src="uploads/patty-logo.png" alt="PattyTrainer" class="nav-logo">
+  </a>
+  <ul class="nav-links">
+    <li><a href="/#historia">Mi historia</a></li>
+    <li><a href="/#filosofia">Filosofía</a></li>
+    <li><a href="/#servicios">Servicios</a></li>
+    <li><a href="/#contacto">Contacto</a></li>
+    <li><a href="/portal" class="active">Portal Alumnas</a></li>
+  </ul>
+  <a href="/" class="nav-back">← Volver al inicio</a>
+</header>
+
+<section class="portal-hero">
+  <h1>Portal de Alumnas</h1>
+  <p>Accede a tu programa, registra tu progreso y conecta con tu entrenadora.</p>
+</section>
+
+<div class="portal-wrap">
+  <script type="text/javascript">
+    var ptd_param = {};
+    ptd_param.apk = "U6ZJSJZTTG1630501";
+    ptd_param.domain = "https://v3portal.ptdistinction.com";
+  </script>
+  <script src="https://v3portal.ptdistinction.com/v3/inside/integration/v1/portal.js"></script>
+  <div id="ptd_portal"></div>
+</div>
+
+<footer class="footer-mini">
+  © 2025 PattyTrainer · <a href="/#contacto">Contacto</a>
+</footer>
+
+</body>
+</html>
