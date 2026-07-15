@@ -304,9 +304,11 @@
 
         // ── UTILS ──
 
-        // Parsea "YYYY-MM-DD" sin desfase por zona horaria
+        // Parsea fechas sin desfase por zona horaria.
+        // Maneja tanto "YYYY-MM-DD" como "YYYY-MM-DDTHH:mm:ss.sssZ" (formato Supabase).
         function parseFecha(s) {
-            const [y, m, d] = s.split('-').map(Number);
+            if (!s) return new Date(NaN);
+            const [y, m, d] = s.slice(0, 10).split('-').map(Number);
             return new Date(y, m - 1, d);
         }
 
@@ -535,11 +537,12 @@
 
             if (pliegues6Validos) {
                 const s6 = raw.triceps + raw.subescapular + raw.supraespinal + raw.abdominal + raw.muslo + raw.pantorrilla;
-                res.suma6 = s6;
+                res.suma6 = parseFloat(s6.toFixed(1));
                 res.grasaYuhasz = (sexo === 'femenino' ? (s6 * 0.1549) + 3.58 : (s6 * 0.097) + 3.64).toFixed(1);
             }
             if (pliegues8Validos) {
-                res.suma8 = raw.triceps + raw.subescapular + raw.supraespinal + raw.abdominal + raw.muslo + raw.pantorrilla + raw.biceps + raw.cresta_iliaca;
+                const s8 = raw.triceps + raw.subescapular + raw.supraespinal + raw.abdominal + raw.muslo + raw.pantorrilla + raw.biceps + raw.cresta_iliaca;
+                res.suma8 = parseFloat(s8.toFixed(1));
             }
 
             if ([raw.biceps, raw.triceps, raw.subescapular, raw.supraespinal].every(v => v > 0)) {
