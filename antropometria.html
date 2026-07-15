@@ -3,29 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Antropometría ISAK 1 | PattyTrainer</title>
-    <!-- Tailwind CSS para diseño moderno, responsivo y estético -->
+    <title>Panel de Antropometría Profesional ISAK 1 | PattyTrainer</title>
+    <!-- Tailwind CSS para diseño moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fuentes elegantes para emparejar con la web de PattyTrainer -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- SDK de Supabase para manejar la base de datos y autenticación -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #fbfaf8; /* Fondo suave estilo editorial */
-        }
-        h1, h2, h3, .font-serif {
-            font-family: 'Cormorant Garamond', serif;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fbfaf8; }
+        h1, h2, h3, h4, .font-serif { font-family: 'Cormorant Garamond', serif; }
     </style>
 </head>
 <body class="p-4 md:p-8 text-gray-800 min-h-screen flex flex-col justify-between">
 
-    <div class="max-w-5xl mx-auto w-full flex-grow">
+    <div class="max-w-6xl mx-auto w-full flex-grow">
 
-        <!-- ================= VISTA 1: LOGIN (SÓLO CONTRASEÑA) ================= -->
+        <!-- VISTA 1: LOGIN -->
         <div id="vista-login" class="max-w-md mx-auto bg-white rounded-2xl shadow-sm border border-stone-100 p-8 mt-12">
             <div class="text-center mb-6">
                 <span class="text-xs uppercase tracking-widest text-stone-500 font-semibold">Acceso Privado</span>
@@ -44,14 +37,13 @@
             <p id="login-error" class="text-red-500 text-xs mt-3 text-center hidden"></p>
         </div>
 
-
-        <!-- ================= VISTA 2: PANEL DE CONTROL (OCULTO POR DEFECTO) ================= -->
+        <!-- VISTA 2: PANEL DE CONTROL -->
         <div id="vista-panel" class="hidden space-y-6">
             
-            <!-- barra de navegación superior -->
+            <!-- Navbar -->
             <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-stone-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-serif text-[#4a3e3d] font-semibold">Panel Antropométrico</h1>
+                    <h1 class="text-2xl md:text-3xl font-serif text-[#4a3e3d] font-semibold">Panel Antropométrico Profesional ISAK 1</h1>
                     <p class="text-xs text-stone-500" id="user-display">Sesión activa como entrenadora</p>
                 </div>
                 <button id="btn-logout" class="text-xs border border-stone-200 hover:bg-stone-50 text-stone-600 px-4 py-2 rounded-lg transition font-medium">
@@ -59,112 +51,114 @@
                 </button>
             </div>
 
-            <!-- Contenido Principal: Dos Columnas -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 
-                <!-- Columna Izquierda: Listado de Alumnas -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 h-fit">
+                <!-- Columna 1: Mis Alumnas -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 h-fit lg:col-span-1">
                     <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold">Mis Alumnas</h3>
                     
-                    <!-- Registrar Nueva Alumna -->
                     <form id="registroAlumnaForm" class="mb-6 space-y-3">
-                        <div>
-                            <input type="text" id="nuevo-nombre" placeholder="Nombre completo" required class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                        </div>
-                        <div>
-                            <input type="email" id="nuevo-email" placeholder="Email (opcional)" class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                        </div>
+                        <input type="text" id="nuevo-nombre" placeholder="Nombre completo" required class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                        <input type="date" id="nuevo-nacimiento" required class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                        <input type="email" id="nuevo-email" placeholder="Email (opcional)" class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
                         <button type="submit" class="w-full bg-[#b08b82] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#c2a69f] transition uppercase tracking-wider">
                             + Registrar Alumna
                         </button>
                     </form>
 
-                    <!-- Lista Dinámica de Alumnas -->
-                    <div id="lista-alumnos" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                    <div id="lista-alumnos" class="space-y-2 max-h-96 overflow-y-auto pr-1">
                         <p class="text-xs text-stone-400 text-center py-4">Cargando alumnas...</p>
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Formulario de Evaluación y Resultados -->
-                <div class="lg:col-span-2 space-y-6">
+                <!-- Columna 2 y 3: Formulario ISAK 1 Completo -->
+                <div class="lg:col-span-3 space-y-6">
                     
-                    <!-- Sección Formulario Evaluación -->
                     <div id="seccion-evaluacion" class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hidden">
                         <div class="border-b pb-2 mb-4 flex justify-between items-center">
-                            <h3 class="text-xl font-serif text-[#4a3e3d] font-semibold">Nueva Evaluación</h3>
+                            <h3 class="text-xl font-serif text-[#4a3e3d] font-semibold">Nueva Evaluación de Perfil Completo</h3>
                             <span id="nombre-alumno-seleccionado" class="text-xs bg-[#f5eae4] text-[#4a3e3d] px-3 py-1 rounded-full font-semibold"></span>
                         </div>
                         
-                        <form id="isakForm" class="space-y-6">
-                            <!-- Datos Clínicos/Básicos -->
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Edad (Años)</label>
-                                    <input type="number" id="edad" required min="10" max="90" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Sexo</label>
-                                    <select id="sexo" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                                        <option value="femenino">Femenino</option>
-                                        <option value="masculino">Masculino</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Peso (kg)</label>
-                                    <input type="number" id="peso" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Talla (cm)</label>
-                                    <input type="number" id="talla" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                                </div>
-                            </div>
-
-                            <!-- Pliegues ISAK 1 -->
+                        <form id="isakForm" class="space-y-6 text-sm">
+                            <!-- 1. MEDIDAS BÁSICAS -->
                             <div>
-                                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-3">Pliegues Cutáneos (mm)</h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <h4 class="text-xs font-bold text-[#b08b82] uppercase tracking-wider mb-3 border-b pb-1">1. Medidas Básicas</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                     <div>
-                                        <label class="block text-xs text-gray-600 mb-1">Tríceps</label>
-                                        <input type="number" id="triceps" required step="0.1" class="w-full px-2 py-1.5 border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                                        <label class="block text-xs text-gray-600 mb-1">Fecha de Evaluación</label>
+                                        <input type="date" id="fecha_eval" required class="w-full px-3 py-2 border rounded-lg text-xs">
                                     </div>
                                     <div>
-                                        <label class="block text-xs text-gray-600 mb-1">Subescapular</label>
-                                        <input type="number" id="subescapular" required step="0.1" class="w-full px-2 py-1.5 border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                                        <label class="block text-xs text-gray-600 mb-1">Sexo Biológico</label>
+                                        <select id="sexo" class="w-full px-3 py-2 border rounded-lg text-xs">
+                                            <option value="femenino">Femenino</option>
+                                            <option value="masculino">Masculino</option>
+                                        </select>
                                     </div>
                                     <div>
-                                        <label class="block text-xs text-gray-600 mb-1">Bíceps</label>
-                                        <input type="number" id="biceps" required step="0.1" class="w-full px-2 py-1.5 border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                                        <label class="block text-xs text-gray-600 mb-1">Peso Corporal (kg)</label>
+                                        <input type="number" id="peso" required step="0.01" class="w-full px-3 py-2 border rounded-lg text-xs">
                                     </div>
                                     <div>
-                                        <label class="block text-xs text-gray-600 mb-1">Supraespinal</label>
-                                        <input type="number" id="supraespinal" required step="0.1" class="w-full px-2 py-1.5 border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                                        <label class="block text-xs text-gray-600 mb-1">Estatura / Talla (cm)</label>
+                                        <input type="number" id="talla" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs">
                                     </div>
                                     <div>
-                                        <label class="block text-xs text-gray-600 mb-1">Abdominal</label>
-                                        <input type="number" id="abdominal" required step="0.1" class="w-full px-2 py-1.5 border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-gray-600 mb-1">Muslo Frontal</label>
-                                        <input type="number" id="muslo" required step="0.1" class="w-full px-2 py-1.5 border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-gray-600 mb-1">Pantorrilla Medial</label>
-                                        <input type="number" id="pantorrilla" required step="0.1" class="w-full px-2 py-1.5 border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                                        <label class="block text-xs text-gray-600 mb-1">Talla Sentado (cm)</label>
+                                        <input type="number" id="talla_sentado" step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs">
                                     </div>
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full bg-[#4a3e3d] text-white text-xs font-semibold py-3 rounded-lg hover:bg-[#5c4e4d] transition uppercase tracking-wider">
-                                Calcular y Guardar Registro
+                            <!-- 2. PLIEGUES CUTÁNEOS (8 PLIEGUES) -->
+                            <div>
+                                <h4 class="text-xs font-bold text-[#b08b82] uppercase tracking-wider mb-3 border-b pb-1">2. Pliegues Cutáneos (mm)</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div><label class="block text-xs text-gray-600 mb-1">Bíceps</label><input type="number" id="biceps" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Tríceps</label><input type="number" id="triceps" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Subescapular</label><input type="number" id="subescapular" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Cresta Ilíaca</label><input type="number" id="cresta_iliaca" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Supraespinal</label><input type="number" id="supraespinal" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Abdominal</label><input type="number" id="abdominal" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Muslo Frontal</label><input type="number" id="muslo" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Pantorrilla Medial</label><input type="number" id="pantorrilla" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                </div>
+                            </div>
+
+                            <!-- 3. PERÍMETROS (5 PERÍMETROS) -->
+                            <div>
+                                <h4 class="text-xs font-bold text-[#b08b82] uppercase tracking-wider mb-3 border-b pb-1">3. Perímetros (cm)</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                    <div><label class="block text-xs text-gray-600 mb-1">Brazo Relajado</label><input type="number" id="p_brazo_rel" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Brazo Flexionado</label><input type="number" id="p_brazo_flex" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Cintura</label><input type="number" id="p_cintura" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Cadera</label><input type="number" id="p_cadera" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Pantorrilla</label><input type="number" id="p_pantorrilla" required step="0.1" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                </div>
+                            </div>
+
+                            <!-- 4. DIÁMETROS ÓSEOS (3 DIÁMETROS) -->
+                            <div>
+                                <h4 class="text-xs font-bold text-[#b08b82] uppercase tracking-wider mb-3 border-b pb-1">4. Diámetros (cm)</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div><label class="block text-xs text-gray-600 mb-1">Biestiloideo (Muñeca)</label><input type="number" id="d_biestiloideo" required step="0.05" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Bicondíleo del Húmero</label><input type="number" id="d_humero" required step="0.05" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                    <div><label class="block text-xs text-gray-600 mb-1">Bicondíleo del Fémur</label><input type="number" id="d_femur" required step="0.05" class="w-full px-3 py-2 border rounded-lg text-xs"></div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full bg-[#4a3e3d] text-white font-semibold py-3 rounded-lg hover:bg-[#5c4e4d] transition uppercase tracking-wider">
+                                Calcular y Guardar Registro Completo
                             </button>
                         </form>
                     </div>
 
-                    <!-- Historial de Evaluaciones Pasadas -->
+                    <!-- Reportes y Evolución Histórica -->
                     <div id="seccion-historial" class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hidden">
-                        <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold">Historial y Evolución</h3>
-                        <div id="tabla-historial" class="space-y-3 max-h-96 overflow-y-auto pr-1">
-                            <!-- Se rellena dinámicamente -->
+                        <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold">Historial de Evaluaciones y Reportes de Fórmulas</h3>
+                        <div id="tabla-historial" class="space-y-4">
+                            <!-- Se rellena con tarjetas avanzadas -->
                         </div>
                     </div>
 
@@ -173,27 +167,22 @@
         </div>
     </div>
 
-    <!-- Pie de página -->
     <footer class="text-center py-8 text-xs text-stone-400 mt-12 border-t border-stone-100 w-full">
         <p>&copy; 2026 PattyTrainer. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- LÓGICA DE CONTROL DE LA APLICACIÓN -->
     <script>
         // ================= CONECTAR CON TU SUPABASE =================
         const SUPABASE_URL = "https://oovethvkpqabxayosdwq.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vdmV0aHZrcHFhYnhheW9zZHdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMjczMzksImV4cCI6MjA5OTcwMzMzOX0.MJfwnXSfnGyv2pMUuFWTyLN9lwmrswBWF-qb6TrspWY";
 
-        // Cambiamos el nombre a supabaseClient para evitar el SyntaxError con la variable global de la CDN
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Cuenta por detrás de escena para el acceso simplificado de Patty
         const CORREO_ENTRENADORA = "patty@trainer.com"; 
 
         let usuarioActual = null;
-        let alumnoSeleccionadoId = null;
+        let alumnoSeleccionado = null;
 
-        // --- VERIFICACIÓN DE SESIÓN INICIAL ---
+        // --- VERIFICACIÓN DE SESIÓN ---
         async function verificarSesion() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
@@ -208,18 +197,11 @@
             }
         }
 
-        // --- INICIO DE SESIÓN ---
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const password = document.getElementById('login-password').value;
             const errorDiv = document.getElementById('login-error');
-
-            // Envío del correo estático con la clave ingresada por el usuario
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ 
-                email: CORREO_ENTRENADORA, 
-                password: password 
-            });
-
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email: CORREO_ENTRENADORA, password: password });
             if (error) {
                 errorDiv.textContent = "Contraseña incorrecta. Por favor, inténtalo de nuevo.";
                 errorDiv.classList.remove('hidden');
@@ -229,167 +211,307 @@
             }
         });
 
-        // --- CERRAR SESIÓN ---
         document.getElementById('btn-logout').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
             location.reload();
         });
 
-        // --- REGISTRAR ALUMNA ---
+        // --- REGISTRAR ALUMNA (INCLUYENDO FECHA DE NACIMIENTO) ---
         document.getElementById('registroAlumnaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nombre = document.getElementById('nuevo-nombre').value;
             const email = document.getElementById('nuevo-email').value;
+            const nacimiento = document.getElementById('nuevo-nacimiento').value;
 
+            // Guardamos el nacimiento dentro de un campo personalizado utilizando el JSON que Supabase soporta
             const { error } = await supabaseClient.from('alumnos').insert([
-                { nombre, email, entrenadora_id: usuarioActual.id }
+                { nombre, email, entrenadora_id: usuarioActual.id, nacimiento }
             ]);
 
             if (!error) {
                 document.getElementById('registroAlumnaForm').reset();
                 cargarAlumnos();
             } else {
-                alert("Error al registrar alumna: " + error.message);
+                alert("Error al registrar: " + error.message);
             }
         });
 
-        // --- CARGAR LISTADO DE ALUMNAS ---
         async function cargarAlumnos() {
-            const { data: alumnos, error } = await supabaseClient
-                .from('alumnos')
-                .select('*')
-                .order('nombre', { ascending: true });
-
+            const { data: alumnos, error } = await supabaseClient.from('alumnos').select('*').order('nombre', { ascending: true });
             const container = document.getElementById('lista-alumnos');
             container.innerHTML = "";
-
             if (alumnos && alumnos.length > 0) {
                 alumnos.forEach(al => {
                     const btn = document.createElement('button');
                     btn.className = "w-full text-left p-3 rounded-xl transition hover:bg-stone-50 border border-transparent hover:border-stone-100 flex flex-col gap-0.5 focus:outline-none focus:ring-1 focus:ring-[#c2a69f]";
-                    btn.innerHTML = `<span class="font-semibold text-stone-800 text-sm">${al.nombre}</span><span class="text-xs text-stone-400">${al.email || 'Sin correo registrado'}</span>`;
+                    const edad = al.nacimiento ? calcularEdad(al.nacimiento) + " años" : "Nacimiento no reg.";
+                    btn.innerHTML = `<span class="font-semibold text-stone-800 text-sm">${al.nombre}</span><span class="text-xs text-stone-400">${edad} | ${al.email || 'Sin email'}</span>`;
                     btn.onclick = () => seleccionarAlumno(al);
                     container.appendChild(btn);
                 });
             } else {
-                container.innerHTML = "<p class='text-xs text-stone-400 text-center py-6'>Aún no tienes alumnas registradas.</p>";
+                container.innerHTML = "<p class='text-xs text-stone-400 text-center py-6'>Sin alumnas.</p>";
             }
         }
 
-        // --- SELECCIONAR ALUMNA DE LA LISTA ---
-        async function seleccionarAlumno(alumno) {
-            alumnoSeleccionadoId = alumno.id;
-            document.getElementById('nombre-alumno-seleccionado').textContent = alumno.nombre;
+        function calcularEdad(fechaNac) {
+            const nac = new Date(fechaNac);
+            const hoy = new Date();
+            let edad = hoy.getFullYear() - nac.getFullYear();
+            const m = hoy.getMonth() - nac.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) { edad--; }
+            return edad;
+        }
+
+        async function seleccionarAlumno(al) {
+            alumnoSeleccionado = al;
+            document.getElementById('nombre-alumno-seleccionado').textContent = al.nombre;
+            document.getElementById('fecha_eval').value = new Date().toISOString().split('T')[0];
             document.getElementById('seccion-evaluacion').classList.remove('hidden');
             document.getElementById('seccion-historial').classList.remove('hidden');
             document.getElementById('seccion-evaluacion').scrollIntoView({ behavior: 'smooth' });
             cargarHistorialEvaluaciones();
         }
 
-        // --- CARGAR HISTORIAL DE EVALUACIONES ---
-        async function cargarHistorialEvaluaciones() {
-            const { data: evs, error } = await supabaseClient
-                .from('evaluaciones')
-                .select('*')
-                .eq('alumno_id', alumnoSeleccionadoId)
-                .order('fecha', { ascending: false });
+        // --- CÁLCULOS MATEMÁTICOS DEL PROTOCOLO ISAK ---
+        function realizarCalculosAntropometricos(raw) {
+            const P = raw.peso;
+            const T = raw.talla / 100; // a metros
+            const edad = raw.edad;
+            const sexo = raw.sexo;
 
+            // IMC
+            const imc = P / (T * T);
+
+            // Sumatorias
+            const suma6 = raw.triceps + raw.subescapular + raw.supraespinal + raw.abdominal + raw.muslo + raw.pantorrilla;
+            const suma8 = suma6 + raw.biceps + raw.cresta_iliaca;
+
+            // 1. Grasa: Durnin-Womersley (4 pliegues)
+            const suma4 = raw.biceps + raw.triceps + raw.subescapular + raw.supraespinal;
+            const logSuma4 = Math.log10(suma4);
+            let densidadDW = 0;
+            if (sexo === 'femenino') {
+                if (edad < 20) densidadDW = 1.1369 - (0.0598 * logSuma4);
+                else if (edad < 30) densidadDW = 1.1599 - (0.0717 * logSuma4);
+                else if (edad < 40) densidadDW = 1.1423 - (0.0632 * logSuma4);
+                else if (edad < 50) densidadDW = 1.1333 - (0.0612 * logSuma4);
+                else densidadDW = 1.1339 - (0.0645 * logSuma4);
+            } else {
+                if (edad < 20) densidadDW = 1.1620 - (0.0630 * logSuma4);
+                else if (edad < 30) densidadDW = 1.1631 - (0.0632 * logSuma4);
+                else if (edad < 40) densidadDW = 1.1422 - (0.0544 * logSuma4);
+                else if (edad < 50) densidadDW = 1.1620 - (0.0700 * logSuma4);
+                else densidadDW = 1.1715 - (0.0779 * logSuma4);
+            }
+            const grasaDW = ((4.95 / densidadDW) - 4.50) * 100;
+
+            // 2. Grasa: Yuhasz (6 pliegues)
+            let grasaYuhasz = 0;
+            if (sexo === 'femenino') {
+                grasaYuhasz = (suma6 * 0.1549) + 3.58;
+            } else {
+                grasaYuhasz = (suma6 * 0.097) + 3.64;
+            }
+
+            // 3. Grasa: Jackson-Pollock (7 pliegues)
+            let densidadJP = 0;
+            const suma7 = raw.triceps + raw.subescapular + raw.cresta_iliaca + raw.abdominal + raw.muslo + raw.supraespinal + raw.biceps; // aproximación 7pl
+            if (sexo === 'femenino') {
+                densidadJP = 1.0970 - (0.00046971 * suma7) + (0.00000056 * suma7 * suma7) - (0.00012828 * edad);
+            } else {
+                densidadJP = 1.1120 - (0.00043499 * suma7) + (0.00000055 * suma7 * suma7) - (0.00028826 * edad);
+            }
+            const grasaJP = ((4.95 / densidadJP) - 4.50) * 100;
+
+            // 4. Somatotipo Carter-Heath
+            // Endomorfia
+            const s3 = (raw.triceps + raw.subescapular + raw.supraespinal) * (170.18 / raw.talla);
+            const endo = -0.7182 + (0.1451 * s3) - (0.00068 * s3 * s3) + (0.0000014 * s3 * s3 * s3);
+
+            // Mesomorfia
+            const pBrazoCorr = raw.p_brazo_flex - (raw.triceps / 10);
+            const pPantCorr = raw.p_pantorrilla - (raw.pantorrilla / 10);
+            const meso = (0.858 * raw.d_humero) + (0.601 * raw.d_femur) + (0.188 * pBrazoCorr) + (0.161 * pPantCorr) - (0.131 * raw.talla) + 4.5;
+
+            // Ectomorfia
+            const ipp = raw.talla / Math.pow(P, 1/3); // Índice ponderal
+            let ecto = 0.1;
+            if (ipp >= 40.75) {
+                ecto = (0.732 * ipp) - 28.58;
+            } else if (ipp > 38.25 && ipp < 40.75) {
+                ecto = (0.463 * ipp) - 17.63;
+            }
+
+            // 5. Masa Ósea (Rocha)
+            const d_cm = raw.talla / 100;
+            const kgOseo = 3.02 * Math.pow((d_cm * d_cm * (raw.d_humero/100) * (raw.d_femur/100) * 400), 0.712);
+
+            // 6. Masa Muscular (Lee)
+            const kgMusculo = P * (0.244 + (0.00348 * raw.p_brazo_rel) + (0.00272 * raw.p_cintura) + (0.00189 * raw.p_pantorrilla) - (0.0021 * edad));
+
+            return {
+                imc: imc.toFixed(1),
+                suma6: suma6.toFixed(1),
+                suma8: suma8.toFixed(1),
+                grasaDW: Math.max(2, grasaDW).toFixed(1),
+                grasaJP: Math.max(2, grasaJP).toFixed(1),
+                grasaYuhasz: Math.max(2, grasaYuhasz).toFixed(1),
+                somatotipo: `${endo.toFixed(1)} - ${meso.toFixed(1)} - ${ecto.toFixed(1)}`,
+                kgOseo: kgOseo.toFixed(1),
+                kgMusculo: kgMusculo.toFixed(1)
+            };
+        }
+
+        // --- CARGAR HISTORIAL ---
+        async function cargarHistorialEvaluaciones() {
+            const { data: evs, error } = await supabaseClient.from('evaluaciones').select('*').eq('alumno_id', alumnoSeleccionado.id).order('fecha', { ascending: false });
             const container = document.getElementById('tabla-historial');
             container.innerHTML = "";
 
             if (evs && evs.length > 0) {
                 evs.forEach(ev => {
-                    const fechaLocal = new Date(ev.fecha).toLocaleDateString('es-ES', {
-                        year: 'numeric', month: 'long', day: 'numeric'
+                    const extra = ev.extra_data || {};
+                    // Si no existen datos extra antiguos, preparamos un reporte dinámico para no romper nada
+                    const calc = realizarCalculosAntropometricos({
+                        peso: ev.peso, talla: ev.talla, edad: ev.edad, sexo: ev.sexo,
+                        biceps: extra.biceps || ev.biceps || 0,
+                        triceps: ev.triceps,
+                        subescapular: ev.subescapular,
+                        cresta_iliaca: extra.cresta_iliaca || 0,
+                        supraespinal: ev.supraespinal,
+                        abdominal: ev.abdominal,
+                        muslo: ev.muslo,
+                        pantorrilla: ev.pantorrilla,
+                        p_brazo_rel: extra.p_brazo_rel || 0,
+                        p_brazo_flex: extra.p_brazo_flex || 0,
+                        p_cintura: extra.p_cintura || 0,
+                        p_cadera: extra.p_cadera || 0,
+                        p_pantorrilla: extra.p_pantorrilla || 0,
+                        d_humero: extra.d_humero || 0,
+                        d_femur: extra.d_femur || 0,
+                        d_biestiloideo: extra.d_biestiloideo || 0
                     });
+
+                    const fechaFmt = new Date(ev.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                    
                     const card = document.createElement('div');
-                    card.className = "p-4 bg-stone-50 rounded-xl border border-stone-100 text-xs grid grid-cols-2 md:grid-cols-4 gap-4 shadow-sm";
+                    card.className = "p-5 bg-stone-50 rounded-2xl border border-stone-200/80 shadow-sm space-y-4";
                     card.innerHTML = `
-                        <div><span class="text-stone-400 block uppercase tracking-wider mb-0.5">Fecha</span><strong class="text-stone-800 text-sm">${fechaLocal}</strong></div>
-                        <div><span class="text-stone-400 block uppercase tracking-wider mb-0.5">Peso (kg)</span><strong class="text-stone-800 text-sm">${ev.peso} kg</strong></div>
-                        <div><span class="text-stone-400 block uppercase tracking-wider mb-0.5">% Grasa Siri</span><strong class="text-[#b08b82] text-sm">${parseFloat(ev.pct_grasa).toFixed(1)}%</strong></div>
-                        <div><span class="text-stone-400 block uppercase tracking-wider mb-0.5">Suma 6 pliegues</span><strong class="text-stone-800 text-sm">${ev.suma_6} mm</strong></div>
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="font-serif text-lg text-[#4a3e3d] font-semibold">Evaluación del ${fechaFmt}</span>
+                            <span class="text-xs bg-stone-200/60 px-2 py-0.5 rounded-full font-semibold">Edad: ${ev.edad} años</span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                            <div><span class="text-gray-400">Peso:</span> <strong class="text-stone-800 text-sm block">${ev.peso} kg</strong></div>
+                            <div><span class="text-gray-400">Talla:</span> <strong class="text-stone-800 text-sm block">${ev.talla} cm</strong></div>
+                            <div><span class="text-gray-400">Suma 6 Pliegues:</span> <strong class="text-stone-800 text-sm block">${calc.suma6} mm</strong></div>
+                            <div><span class="text-gray-400">Suma 8 Pliegues:</span> <strong class="text-stone-800 text-sm block">${calc.suma8} mm</strong></div>
+                        </div>
+                        
+                        <div class="border-t pt-3">
+                            <h5 class="text-xs font-bold text-[#b08b82] uppercase mb-2">Resultados de Fórmulas</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-white p-3 rounded-xl border border-stone-100">
+                                <div>
+                                    <span class="text-gray-500 font-semibold block mb-1">Grasa Corporal:</span>
+                                    <ul class="space-y-0.5">
+                                        <li>Durnin-Womersley: <strong>${calc.grasaDW}%</strong></li>
+                                        <li>Yuhasz: <strong>${calc.grasaYuhasz}%</strong></li>
+                                        <li>Jackson-Pollock: <strong>${calc.grasaJP}%</strong></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 font-semibold block mb-1">Somatotipo (Endo-Meso-Ecto):</span>
+                                    <strong class="text-stone-800 text-sm block mt-1">${calc.somatotipo}</strong>
+                                    <span class="text-[10px] text-gray-400">Ecuación de Carter-Heath</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 font-semibold block mb-1">Masa de Tejidos:</span>
+                                    <ul class="space-y-0.5">
+                                        <li>Masa Muscular: <strong>${calc.kgMusculo} kg</strong></li>
+                                        <li>Masa Ósea: <strong>${calc.kgOseo} kg</strong></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     `;
                     container.appendChild(card);
                 });
             } else {
-                container.innerHTML = "<p class='text-xs text-stone-400 py-6 text-center italic border-2 border-dashed border-stone-100 rounded-xl'>No hay registros guardados de esta alumna.</p>";
+                container.innerHTML = "<p class='text-xs text-stone-400 py-6 text-center italic border-2 border-dashed border-stone-100 rounded-xl'>No hay registros.</p>";
             }
         }
 
-        // --- CÁLCULOS ANTROPOMÉTRICOS Y GUARDADO EN BD ---
+        // --- CALCULAR Y GUARDAR EVALUACIÓN COMPLETA ---
         document.getElementById('isakForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const edad = parseInt(document.getElementById('edad').value);
+            const fechaEval = document.getElementById('fecha_eval').value;
+            const edad = alumnoSeleccionado.nacimiento ? calcularEdad(alumnoSeleccionado.nacimiento) : 25;
             const sexo = document.getElementById('sexo').value;
             const peso = parseFloat(document.getElementById('peso').value);
-            const tallaM = parseFloat(document.getElementById('talla').value) / 100;
+            const talla = parseFloat(document.getElementById('talla').value);
+            const talla_sentado = parseFloat(document.getElementById('talla_sentado').value) || 0;
 
+            const biceps = parseFloat(document.getElementById('biceps').value);
             const triceps = parseFloat(document.getElementById('triceps').value);
             const subescapular = parseFloat(document.getElementById('subescapular').value);
-            const biceps = parseFloat(document.getElementById('biceps').value);
+            const cresta_iliaca = parseFloat(document.getElementById('cresta_iliaca').value);
             const supraespinal = parseFloat(document.getElementById('supraespinal').value);
             const abdominal = parseFloat(document.getElementById('abdominal').value);
             const muslo = parseFloat(document.getElementById('muslo').value);
             const pantorrilla = parseFloat(document.getElementById('pantorrilla').value);
 
-            // 1. Sumatoria de 6 Pliegues (Estándar ISAK)
-            const sumatoria6 = triceps + subescapular + supraespinal + abdominal + muslo + pantorrilla;
+            const p_brazo_rel = parseFloat(document.getElementById('p_brazo_rel').value);
+            const p_brazo_flex = parseFloat(document.getElementById('p_brazo_flex').value);
+            const p_cintura = parseFloat(document.getElementById('p_cintura').value);
+            const p_cadera = parseFloat(document.getElementById('p_cadera').value);
+            const p_pantorrilla = parseFloat(document.getElementById('p_pantorrilla').value);
 
-            // 2. Ecuación de Durnin-Womersley (4 Pliegues: Bíceps, Tríceps, Subescapular, Supraespinal)
-            const suma4 = biceps + triceps + subescapular + supraespinal;
-            const logSuma4 = Math.log10(suma4);
-            let densidad = 0;
+            const d_biestiloideo = parseFloat(document.getElementById('d_biestiloideo').value);
+            const d_humero = parseFloat(document.getElementById('d_humero').value);
+            const d_femur = parseFloat(document.getElementById('d_femur').value);
 
-            // Coeficientes específicos según edad y sexo
-            if (sexo === 'femenino') {
-                if (edad < 20) densidad = 1.1369 - (0.0598 * logSuma4);
-                else if (edad < 30) densidad = 1.1599 - (0.0717 * logSuma4);
-                else if (edad < 40) densidad = 1.1423 - (0.0632 * logSuma4);
-                else if (edad < 50) densidad = 1.1333 - (0.0612 * logSuma4);
-                else densidad = 1.1339 - (0.0645 * logSuma4);
-            } else {
-                if (edad < 20) densidad = 1.1620 - (0.0630 * logSuma4);
-                else if (edad < 30) densidad = 1.1631 - (0.0632 * logSuma4);
-                else if (edad < 40) densidad = 1.1422 - (0.0544 * logSuma4);
-                else if (edad < 50) densidad = 1.1620 - (0.0700 * logSuma4);
-                else densidad = 1.1715 - (0.0779 * logSuma4);
-            }
+            // Realizamos los cálculos matemáticos para guardar los datos principales de forma nativa en la base de datos
+            const calcs = realizarCalculosAntropometricos({
+                peso, talla, edad, sexo, biceps, triceps, subescapular, cresta_iliaca, supraespinal, abdominal, muslo, pantorrilla,
+                p_brazo_rel, p_brazo_flex, p_cintura, p_cadera, p_pantorrilla, d_biestiloideo, d_humero, d_femur
+            });
 
-            // 3. Ecuación de Siri para Porcentaje de Grasa
-            const pctGrasa = ((4.95 / densidad) - 4.50) * 100;
+            // Guardamos todas las variables secundarias e ISAK dentro de la columna genérica extra_data (JSON)
+            const extra_data = {
+                biceps, cresta_iliaca, talla_sentado, p_brazo_rel, p_brazo_flex, p_cintura, p_cadera, p_pantorrilla, d_biestiloideo, d_humero, d_femur
+            };
 
-            // 4. Almacenamiento en la tabla 'evaluaciones' de Supabase
             const { error } = await supabaseClient.from('evaluaciones').insert([
                 {
-                    alumno_id: alumnoSeleccionadoId,
-                    edad, 
-                    sexo, 
-                    peso, 
-                    talla: parseFloat(document.getElementById('talla').value),
-                    triceps, 
-                    subescapular, 
-                    biceps, 
-                    supraespinal, 
-                    abdominal, 
-                    muslo, 
+                    alumno_id: alumnoSeleccionado.id,
+                    fecha: fechaEval,
+                    edad,
+                    sexo,
+                    peso,
+                    talla,
+                    triceps,
+                    subescapular,
+                    supraespinal,
+                    abdominal,
+                    muslo,
                     pantorrilla,
-                    pct_grasa: pctGrasa, 
-                    suma_6: sumatoria6
+                    pct_grasa: calcs.grasaDW,
+                    suma_6: calcs.suma6,
+                    extra_data: extra_data // Supabase interpretará esto automáticamente como JSON
                 }
             ]);
 
             if (!error) {
                 document.getElementById('isakForm').reset();
                 cargarHistorialEvaluaciones();
-                alert("Evaluación guardada exitosamente.");
+                alert("Evaluación profesional de perfil restringido guardada.");
             } else {
-                alert("Error al guardar la evaluación en el servidor: " + error.message);
+                alert("Error al guardar: " + error.message);
             }
         });
 
-        // Iniciar la verificación de sesión en cuanto cargue el DOM
         verificarSesion();
     </script>
 </body>
