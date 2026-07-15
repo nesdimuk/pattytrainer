@@ -6,8 +6,11 @@
     <title>Panel de Antropometría Profesional ISAK 1 | PattyTrainer</title>
     <!-- Tailwind CSS para diseño moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght=400;600&family=Plus+Jakarta+Sans:wght=300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chart.js para generar gráficos interactivos espectaculares -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fbfaf8; }
@@ -55,15 +58,22 @@
                 
                 <!-- Columna 1: Mis Alumnas -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 h-fit lg:col-span-1">
-                    <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold">Mis Alumnas</h3>
+                    <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold" id="titulo-gestion-alumna">Mis Alumnas</h3>
                     
+                    <!-- Registrar / Editar Nueva Alumna -->
                     <form id="registroAlumnaForm" class="mb-6 space-y-3">
+                        <input type="hidden" id="alumna-edit-id" value="">
                         <input type="text" id="nuevo-nombre" placeholder="Nombre completo" required class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
                         <input type="date" id="nuevo-nacimiento" required class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
                         <input type="email" id="nuevo-email" placeholder="Email (opcional)" class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                        <button type="submit" class="w-full bg-[#b08b82] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#c2a69f] transition uppercase tracking-wider">
-                            + Registrar Alumna
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="submit" id="btn-submit-alumna" class="flex-grow bg-[#b08b82] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#c2a69f] transition uppercase tracking-wider">
+                                + Registrar Alumna
+                            </button>
+                            <button type="button" id="btn-cancelar-edicion" class="hidden text-xs bg-stone-200 text-stone-700 px-3 py-2.5 rounded-lg hover:bg-stone-300 transition">
+                                Cancelar
+                            </button>
+                        </div>
                     </form>
 
                     <div id="lista-alumnos" class="space-y-2 max-h-96 overflow-y-auto pr-1">
@@ -71,13 +81,18 @@
                     </div>
                 </div>
 
-                <!-- Columna 2 y 3: Formulario ISAK 1 Flexible -->
+                <!-- Columna 2 y 3: Formulario ISAK 1 Flexible y Reportes -->
                 <div class="lg:col-span-3 space-y-6">
                     
                     <div id="seccion-evaluacion" class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hidden">
                         <div class="border-b pb-2 mb-4 flex justify-between items-center">
                             <h3 class="text-xl font-serif text-[#4a3e3d] font-semibold">Nueva Evaluación</h3>
-                            <span id="nombre-alumno-seleccionado" class="text-xs bg-[#f5eae4] text-[#4a3e3d] px-3 py-1 rounded-full font-semibold"></span>
+                            <div class="flex items-center gap-2">
+                                <button id="btn-datos-prueba" class="text-xs bg-[#c2a69f]/30 hover:bg-[#c2a69f]/50 text-[#4a3e3d] px-3 py-1.5 rounded-lg transition font-semibold">
+                                    🧪 Cargar Datos de Prueba
+                                </button>
+                                <span id="nombre-alumno-seleccionado" class="text-xs bg-[#f5eae4] text-[#4a3e3d] px-3 py-1 rounded-full font-semibold"></span>
+                            </div>
                         </div>
                         
                         <form id="isakForm" class="space-y-6 text-sm">
@@ -154,11 +169,19 @@
                         </form>
                     </div>
 
+                    <!-- SECCIÓN DEL GRÁFICO EVOLUTIVO -->
+                    <div id="seccion-grafico" class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hidden">
+                        <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold">Gráfico de Evolución y Progreso</h3>
+                        <div class="relative w-full h-80">
+                            <canvas id="graficaEvolutiva"></canvas>
+                        </div>
+                    </div>
+
                     <!-- Reportes y Evolución Histórica -->
                     <div id="seccion-historial" class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hidden">
                         <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold">Historial y Evolución</h3>
                         <div id="tabla-historial" class="space-y-4">
-                            <!-- Se rellena con tarjetas avanzadas -->
+                            <!-- Se rellena dinámicamente -->
                         </div>
                     </div>
 
@@ -181,6 +204,7 @@
 
         let usuarioActual = null;
         let alumnoSeleccionado = null;
+        let miGrafico = null; // Variable para almacenar la instancia del gráfico y poder destruirlo/recrearlo
 
         // --- VERIFICACIÓN DE SESIÓN ---
         async function verificarSesion() {
@@ -216,40 +240,129 @@
             location.reload();
         });
 
-        // --- REGISTRAR ALUMNA ---
+        // --- CREAR / EDITAR ALUMNA ---
         document.getElementById('registroAlumnaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const id = document.getElementById('alumna-edit-id').value;
             const nombre = document.getElementById('nuevo-nombre').value;
             const email = document.getElementById('nuevo-email').value;
             const nacimiento = document.getElementById('nuevo-nacimiento').value;
 
-            const { error } = await supabaseClient.from('alumnos').insert([
-                { nombre, email, entrenadora_id: usuarioActual.id, nacimiento }
-            ]);
+            if (id) {
+                // Modo Edición
+                const { error } = await supabaseClient
+                    .from('alumnos')
+                    .update({ nombre, email, nacimiento })
+                    .eq('id', id);
 
-            if (!error) {
-                document.getElementById('registroAlumnaForm').reset();
-                cargarAlumnos();
+                if (!error) {
+                    resetearFormularioAlumna();
+                    cargarAlumnos();
+                    alert("Datos de la alumna actualizados con éxito.");
+                } else {
+                    alert("Error al actualizar: " + error.message);
+                }
             } else {
-                alert("Error al registrar: " + error.message);
+                // Modo Registro Nuevo
+                const { error } = await supabaseClient.from('alumnos').insert([
+                    { nombre, email, entrenadora_id: usuarioActual.id, nacimiento }
+                ]);
+
+                if (!error) {
+                    document.getElementById('registroAlumnaForm').reset();
+                    cargarAlumnos();
+                } else {
+                    alert("Error al registrar: " + error.message);
+                }
             }
         });
 
+        // Cancelar edición
+        document.getElementById('btn-cancelar-edicion').addEventListener('click', resetearFormularioAlumna);
+
+        function resetearFormularioAlumna() {
+            document.getElementById('alumna-edit-id').value = "";
+            document.getElementById('nuevo-nombre').value = "";
+            document.getElementById('nuevo-email').value = "";
+            document.getElementById('nuevo-nacimiento').value = "";
+            document.getElementById('titulo-gestion-alumna').textContent = "Mis Alumnas";
+            document.getElementById('btn-submit-alumna').textContent = "+ Registrar Alumna";
+            document.getElementById('btn-cancelar-edicion').classList.add('hidden');
+        }
+
+        // --- CARGAR LISTADO DE ALUMNAS CON ACCIONES DE EDICIÓN / ELIMINACIÓN ---
         async function cargarAlumnos() {
             const { data: alumnos, error } = await supabaseClient.from('alumnos').select('*').order('nombre', { ascending: true });
             const container = document.getElementById('lista-alumnos');
             container.innerHTML = "";
             if (alumnos && alumnos.length > 0) {
                 alumnos.forEach(al => {
-                    const btn = document.createElement('button');
-                    btn.className = "w-full text-left p-3 rounded-xl transition hover:bg-stone-50 border border-transparent hover:border-stone-100 flex flex-col gap-0.5 focus:outline-none focus:ring-1 focus:ring-[#c2a69f]";
+                    const row = document.createElement('div');
+                    row.className = "flex items-center justify-between p-3 rounded-xl border border-stone-100 bg-white hover:bg-stone-50/50 transition group";
+                    
                     const edad = al.nacimiento ? calcularEdad(al.nacimiento) + " años" : "Nacimiento no reg.";
-                    btn.innerHTML = `<span class="font-semibold text-stone-800 text-sm">${al.nombre}</span><span class="text-xs text-stone-400">${edad} | ${al.email || 'Sin email'}</span>`;
-                    btn.onclick = () => seleccionarAlumno(al);
-                    container.appendChild(btn);
+                    
+                    row.innerHTML = `
+                        <button class="text-left flex-grow focus:outline-none flex flex-col gap-0.5">
+                            <span class="font-semibold text-stone-800 text-sm">${al.nombre}</span>
+                            <span class="text-xs text-stone-400">${edad} | ${al.email || 'Sin email'}</span>
+                        </button>
+                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button title="Editar Alumna" class="btn-editar p-1.5 hover:bg-stone-100 rounded text-stone-600 transition">
+                                ✏️
+                            </button>
+                            <button title="Eliminar Alumna" class="btn-eliminar p-1.5 hover:bg-red-50 rounded text-red-600 transition">
+                                🗑️
+                            </button>
+                        </div>
+                    `;
+
+                    // Acción al seleccionar alumna
+                    row.querySelector('button').onclick = () => seleccionarAlumno(al);
+                    
+                    // Acción Editar
+                    row.querySelector('.btn-editar').onclick = (e) => {
+                        e.stopPropagation();
+                        prepararEdicion(al);
+                    };
+
+                    // Acción Eliminar
+                    row.querySelector('.btn-eliminar').onclick = (e) => {
+                        e.stopPropagation();
+                        confirmarEliminarAlumna(al);
+                    };
+
+                    container.appendChild(row);
                 });
             } else {
                 container.innerHTML = "<p class='text-xs text-stone-400 text-center py-6'>Sin alumnas.</p>";
+            }
+        }
+
+        function prepararEdicion(al) {
+            document.getElementById('alumna-edit-id').value = al.id;
+            document.getElementById('nuevo-nombre').value = al.nombre;
+            document.getElementById('nuevo-email').value = al.email || "";
+            document.getElementById('nuevo-nacimiento').value = al.nacimiento || "";
+            document.getElementById('titulo-gestion-alumna').textContent = "Editar Alumna";
+            document.getElementById('btn-submit-alumna').textContent = "Guardar Cambios";
+            document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
+        }
+
+        async function confirmarEliminarAlumna(al) {
+            const conf = confirm(`¿Estás completamente segura de eliminar a "${al.nombre}"? Se perderán para siempre todas sus evaluaciones guardadas.`);
+            if (conf) {
+                const { error } = await supabaseClient.from('alumnos').delete().eq('id', al.id);
+                if (!error) {
+                    if (alumnoSeleccionado && alumnoSeleccionado.id === al.id) {
+                        document.getElementById('seccion-evaluacion').classList.add('hidden');
+                        document.getElementById('seccion-grafico').classList.add('hidden');
+                        document.getElementById('seccion-historial').classList.add('hidden');
+                    }
+                    cargarAlumnos();
+                } else {
+                    alert("Error al eliminar alumna: " + error.message);
+                }
             }
         }
 
@@ -281,34 +394,29 @@
 
             const res = {
                 imc: (P / (T * T)).toFixed(1),
-                suma6: "N/A",
-                suma8: "N/A",
-                grasaDW: "Datos insuficientes",
-                grasaJP: "Datos insuficientes",
-                grasaYuhasz: "Datos insuficientes",
+                suma6: 0,
+                suma8: 0,
+                grasaDW: "N/A",
+                grasaJP: "N/A",
+                grasaYuhasz: "N/A",
                 somatotipo: "Datos insuficientes (perímetros/diámetros)",
-                kgOseo: "Datos insuficientes (diámetros)",
-                kgMusculo: "Datos insuficientes (perímetros)"
+                kgOseo: "Datos insuficientes",
+                kgMusculo: "Datos insuficientes"
             };
 
-            // Evaluar sumatorias de pliegues (solo si se ingresan todos los requeridos)
             const pliegues6Validos = [raw.triceps, raw.subescapular, raw.supraespinal, raw.abdominal, raw.muslo, raw.pantorrilla].every(v => v > 0);
             const pliegues8Validos = pliegues6Validos && [raw.biceps, raw.cresta_iliaca].every(v => v > 0);
 
             if (pliegues6Validos) {
                 const s6 = raw.triceps + raw.subescapular + raw.supraespinal + raw.abdominal + raw.muslo + raw.pantorrilla;
-                res.suma6 = s6.toFixed(1) + " mm";
-                
-                // Grasa Yuhasz (6 pliegues)
-                res.grasaYuhasz = ((sexo === 'femenino' ? (s6 * 0.1549) + 3.58 : (s6 * 0.097) + 3.64)).toFixed(1) + "%";
+                res.suma6 = s6;
+                res.grasaYuhasz = ((sexo === 'femenino' ? (s6 * 0.1549) + 3.58 : (s6 * 0.097) + 3.64)).toFixed(1);
             }
 
             if (pliegues8Validos) {
-                const s8 = raw.triceps + raw.subescapular + raw.supraespinal + raw.abdominal + raw.muslo + raw.pantorrilla + raw.biceps + raw.cresta_iliaca;
-                res.suma8 = s8.toFixed(1) + " mm";
+                res.suma8 = raw.triceps + raw.subescapular + raw.supraespinal + raw.abdominal + raw.muslo + raw.pantorrilla + raw.biceps + raw.cresta_iliaca;
             }
 
-            // Grasa Durnin-Womersley (Requiere: biceps, triceps, subescapular, supraespinal)
             if ([raw.biceps, raw.triceps, raw.subescapular, raw.supraespinal].every(v => v > 0)) {
                 const suma4 = raw.biceps + raw.triceps + raw.subescapular + raw.supraespinal;
                 const logSuma4 = Math.log10(suma4);
@@ -327,10 +435,9 @@
                     else densidadDW = 1.1715 - (0.0779 * logSuma4);
                 }
                 const grasaDW = ((4.95 / densidadDW) - 4.50) * 100;
-                res.grasaDW = Math.max(2, grasaDW).toFixed(1) + "%";
+                res.grasaDW = Math.max(2, grasaDW).toFixed(1);
             }
 
-            // Grasa Jackson-Pollock (7 pliegues)
             if ([raw.triceps, raw.subescapular, raw.cresta_iliaca, raw.abdominal, raw.muslo, raw.supraespinal, raw.biceps].every(v => v > 0)) {
                 const suma7 = raw.triceps + raw.subescapular + raw.cresta_iliaca + raw.abdominal + raw.muslo + raw.supraespinal + raw.biceps;
                 let densidadJP = 0;
@@ -340,21 +447,15 @@
                     densidadJP = 1.1120 - (0.00043499 * suma7) + (0.00000055 * suma7 * suma7) - (0.00028826 * edad);
                 }
                 const grasaJP = ((4.95 / densidadJP) - 4.50) * 100;
-                res.grasaJP = Math.max(2, grasaJP).toFixed(1) + "%";
+                res.grasaJP = Math.max(2, grasaJP).toFixed(1);
             }
 
-            // Somatotipo Carter-Heath (Requiere pliegues triceps, subescapular, supraespinal, pantorrilla + diametros humero, femur + perimetros brazo flex, pantorrilla)
             if ([raw.triceps, raw.subescapular, raw.supraespinal, raw.pantorrilla, raw.d_humero, raw.d_femur, raw.p_brazo_flex, raw.p_pantorrilla].every(v => v > 0)) {
-                // Endomorfia
                 const s3 = (raw.triceps + raw.subescapular + raw.supraespinal) * (170.18 / raw.talla);
                 const endo = -0.7182 + (0.1451 * s3) - (0.00068 * s3 * s3) + (0.0000014 * s3 * s3 * s3);
-
-                // Mesomorfia
                 const pBrazoCorr = raw.p_brazo_flex - (raw.triceps / 10);
                 const pPantCorr = raw.p_pantorrilla - (raw.pantorrilla / 10);
                 const meso = (0.858 * raw.d_humero) + (0.601 * raw.d_femur) + (0.188 * pBrazoCorr) + (0.161 * pPantCorr) - (0.131 * raw.talla) + 4.5;
-
-                // Ectomorfia
                 const ipp = raw.talla / Math.pow(P, 1/3);
                 let ecto = 0.1;
                 if (ipp >= 40.75) {
@@ -365,14 +466,12 @@
                 res.somatotipo = `${endo.toFixed(1)} - ${meso.toFixed(1)} - ${ecto.toFixed(1)}`;
             }
 
-            // Masa Ósea (Rocha) -> Requiere diámetros fémur y húmero
             if (raw.d_humero > 0 && raw.d_femur > 0) {
                 const d_cm = raw.talla / 100;
                 const kgOseo = 3.02 * Math.pow((d_cm * d_cm * (raw.d_humero/100) * (raw.d_femur/100) * 400), 0.712);
                 res.kgOseo = kgOseo.toFixed(1) + " kg";
             }
 
-            // Masa Muscular (Lee) -> Requiere perímetros brazo rel, cintura, pantorrilla
             if (raw.p_brazo_rel > 0 && raw.p_cintura > 0 && raw.p_pantorrilla > 0) {
                 const kgMusculo = P * (0.244 + (0.00348 * raw.p_brazo_rel) + (0.00272 * raw.p_cintura) + (0.00189 * raw.p_pantorrilla) - (0.0021 * edad));
                 res.kgMusculo = kgMusculo.toFixed(1) + " kg";
@@ -381,16 +480,23 @@
             return res;
         }
 
-        // --- CARGAR HISTORIAL ---
+        // --- CARGAR HISTORIAL Y DIBUJAR GRÁFICO ---
         async function cargarHistorialEvaluaciones() {
-            const { data: evs, error } = await supabaseClient.from('evaluaciones').select('*').eq('alumno_id', alumnoSeleccionado.id).order('fecha', { ascending: false });
+            const { data: evs, error } = await supabaseClient.from('evaluaciones').select('*').eq('alumno_id', alumnoSeleccionado.id).order('fecha', { ascending: true });
             const container = document.getElementById('tabla-historial');
             container.innerHTML = "";
 
             if (evs && evs.length > 0) {
-                evs.forEach(ev => {
+                const fechas = [];
+                const pesos = [];
+                const grasas = [];
+                const sumas6 = [];
+
+                // Revertimos el array para la tabla (las más recientes arriba)
+                const evsRecientesArriba = [...evs].reverse();
+
+                evsRecientesArriba.forEach(ev => {
                     const extra = ev.extra_data || {};
-                    // Mapeamos los datos considerando que pueden venir vacíos o en 0
                     const calc = realizarCalculosAntropometricos({
                         peso: ev.peso, talla: ev.talla, edad: ev.edad, sexo: ev.sexo,
                         biceps: parseFloat(extra.biceps) || 0,
@@ -411,20 +517,31 @@
                         d_biestiloideo: parseFloat(extra.d_biestiloideo) || 0
                     });
 
-                    const fechaFmt = new Date(ev.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const fechaFmt = new Date(ev.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
                     
+                    // Almacenar para gráfico (en orden cronológico ascendente)
+                    fechas.unshift(fechaFmt);
+                    pesos.unshift(ev.peso);
+                    grasas.unshift(calc.grasaDW !== "N/A" ? parseFloat(calc.grasaDW) : null);
+                    sumas6.unshift(calc.suma6 > 0 ? calc.suma6 : null);
+
                     const card = document.createElement('div');
                     card.className = "p-5 bg-stone-50 rounded-2xl border border-stone-200/80 shadow-sm space-y-4";
                     card.innerHTML = `
                         <div class="flex justify-between items-center border-b pb-2">
                             <span class="font-serif text-lg text-[#4a3e3d] font-semibold">Evaluación del ${fechaFmt}</span>
-                            <span class="text-xs bg-stone-200/60 px-2 py-0.5 rounded-full font-semibold">Edad: ${ev.edad} años</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="eliminarEvaluacion('${ev.id}')" class="text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition">
+                                    Borrar Reg.
+                                </button>
+                                <span class="text-xs bg-stone-200/60 px-2 py-0.5 rounded-full font-semibold">Edad: ${ev.edad} años</span>
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                             <div><span class="text-gray-400">Peso:</span> <strong class="text-stone-800 text-sm block">${ev.peso} kg</strong></div>
                             <div><span class="text-gray-400">Talla:</span> <strong class="text-stone-800 text-sm block">${ev.talla} cm</strong></div>
-                            <div><span class="text-gray-400">Suma 6 Pliegues:</span> <strong class="text-stone-800 text-sm block">${calc.suma6}</strong></div>
-                            <div><span class="text-gray-400">Suma 8 Pliegues:</span> <strong class="text-stone-800 text-sm block">${calc.suma8}</strong></div>
+                            <div><span class="text-gray-400">Suma 6 Pliegues:</span> <strong class="text-stone-800 text-sm block">${calc.suma6 > 0 ? calc.suma6 + ' mm' : 'N/A'}</strong></div>
+                            <div><span class="text-gray-400">Suma 8 Pliegues:</span> <strong class="text-stone-800 text-sm block">${calc.suma8 > 0 ? calc.suma8 + ' mm' : 'N/A'}</strong></div>
                         </div>
                         
                         <div class="border-t pt-3">
@@ -433,9 +550,9 @@
                                 <div>
                                     <span class="text-gray-500 font-semibold block mb-1">Grasa Corporal:</span>
                                     <ul class="space-y-0.5">
-                                        <li>Durnin-Womersley: <strong>${calc.grasaDW}</strong></li>
-                                        <li>Yuhasz: <strong>${calc.grasaYuhasz}</strong></li>
-                                        <li>Jackson-Pollock: <strong>${calc.grasaJP}</strong></li>
+                                        <li>Durnin-Womersley: <strong>${calc.grasaDW !== "N/A" ? calc.grasaDW + '%' : 'Datos insuficientes'}</strong></li>
+                                        <li>Yuhasz: <strong>${calc.grasaYuhasz !== "N/A" ? calc.grasaYuhasz + '%' : 'Datos insuficientes'}</strong></li>
+                                        <li>Jackson-Pollock: <strong>${calc.grasaJP !== "N/A" ? calc.grasaJP + '%' : 'Datos insuficientes'}</strong></li>
                                     </ul>
                                 </div>
                                 <div>
@@ -454,12 +571,153 @@
                     `;
                     container.appendChild(card);
                 });
+
+                // Inicializar Gráfico si hay por lo menos 2 evaluaciones para comparar
+                if (evs.length >= 2) {
+                    document.getElementById('seccion-grafico').classList.remove('hidden');
+                    dibujarGrafica(fechas, pesos, grasas, sumas6);
+                } else {
+                    document.getElementById('seccion-grafico').classList.add('hidden');
+                }
+
             } else {
                 container.innerHTML = "<p class='text-xs text-stone-400 py-6 text-center italic border-2 border-dashed border-stone-100 rounded-xl'>No hay registros.</p>";
+                document.getElementById('seccion-grafico').classList.add('hidden');
             }
         }
 
-        // --- GUARDAR EVALUACIÓN ---
+        // --- BORRAR EVALUACIÓN INDIVIDUAL ---
+        async function eliminarEvaluacion(evId) {
+            if (confirm("¿Estás segura de eliminar este registro de evaluación?")) {
+                const { error } = await supabaseClient.from('evaluaciones').delete().eq('id', evId);
+                if (!error) {
+                    cargarHistorialEvaluaciones();
+                } else {
+                    alert("Error al borrar registro: " + error.message);
+                }
+            }
+        }
+
+        // --- GENERAR GRÁFICO EVOLUTIVO ---
+        function dibujarGrafica(labels, pesoData, grasaData, suma6Data) {
+            if (miGrafico) {
+                miGrafico.destroy(); // Destruir gráfico anterior para evitar sobreescrituras visuales
+            }
+
+            const ctx = document.getElementById('graficaEvolutiva').getContext('2d');
+            miGrafico = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Peso Corporal (kg)',
+                            data: pesoData,
+                            borderColor: '#4a3e3d',
+                            backgroundColor: '#4a3e3d/20',
+                            yAxisID: 'yPeso',
+                            tension: 0.3,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Grasa Durnin (%)',
+                            data: grasaData,
+                            borderColor: '#b08b82',
+                            backgroundColor: 'transparent',
+                            yAxisID: 'yGrasa',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Suma 6 Pliegues (mm)',
+                            data: suma6Data,
+                            borderColor: '#c2a69f',
+                            backgroundColor: 'transparent',
+                            yAxisID: 'ySuma6',
+                            tension: 0.3,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        yPeso: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Peso (kg)', font: { size: 10 } }
+                        },
+                        yGrasa: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Grasa (%)', font: { size: 10 } }
+                        },
+                        ySuma6: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Suma Pliegues (mm)', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- INYECTOR DE DATOS DE PRUEBA CHRONOLÓGICOS ---
+        document.getElementById('btn-datos-prueba').addEventListener('click', async () => {
+            if (!alumnoSeleccionado) return;
+            
+            const conf = confirm(`¿Quieres inyectar 3 evaluaciones cronológicas de prueba para ${alumnoSeleccionado.nombre} y verificar el gráfico de progreso?`);
+            if (!conf) return;
+
+            const edad = alumnoSeleccionado.nacimiento ? calcularEdad(alumnoSeleccionado.nacimiento) : 25;
+            const hoy = new Date();
+            
+            // Evaluaciones ficticias de progreso real de entrenamiento:
+            const evaluacionesDePrueba = [
+                // Evaluación 1: Hace 3 meses (Mayor peso, grasa y pliegues)
+                {
+                    alumno_id: alumnoSeleccionado.id,
+                    fecha: new Date(new Date().setMonth(hoy.getMonth() - 3)).toISOString().split('T')[0],
+                    edad, sexo: 'femenino', peso: 68.5, talla: 164,
+                    triceps: 18.2, subescapular: 16.4, supraespinal: 15.1, abdominal: 22.0, muslo: 25.4, pantorrilla: 14.8,
+                    pct_grasa: 28.4, suma_6: 111.9,
+                    extra_data: { biceps: 9.2, cresta_iliaca: 17.5, p_brazo_rel: 29.5, p_brazo_flex: 30.1, p_cintura: 78.0, p_cadera: 102.0, p_pantorrilla: 36.5, d_humero: 6.2, d_femur: 9.4, d_biestiloideo: 5.1 }
+                },
+                // Evaluación 2: Hace 2 meses (Progreso intermedio)
+                {
+                    alumno_id: alumnoSeleccionado.id,
+                    fecha: new Date(new Date().setMonth(hoy.getMonth() - 2)).toISOString().split('T')[0],
+                    edad, sexo: 'femenino', peso: 66.2, talla: 164,
+                    triceps: 15.1, subescapular: 14.2, supraespinal: 12.4, abdominal: 18.5, muslo: 22.1, pantorrilla: 13.0,
+                    pct_grasa: 25.1, suma_6: 95.3,
+                    extra_data: { biceps: 7.5, cresta_iliaca: 14.2, p_brazo_rel: 28.2, p_brazo_flex: 29.0, p_cintura: 74.5, p_cadera: 99.2, p_pantorrilla: 35.8, d_humero: 6.2, d_femur: 9.4, d_biestiloideo: 5.1 }
+                },
+                // Evaluación 3: Hace 1 mes (Gran cambio físico, menos grasa y pliegues, ganancia muscular)
+                {
+                    alumno_id: alumnoSeleccionado.id,
+                    fecha: new Date(new Date().setMonth(hoy.getMonth() - 1)).toISOString().split('T')[0],
+                    edad, sexo: 'femenino', peso: 64.0, talla: 164,
+                    triceps: 12.4, subescapular: 12.0, supraespinal: 10.1, abdominal: 14.8, muslo: 19.5, pantorrilla: 11.2,
+                    pct_grasa: 21.8, suma_6: 80.0,
+                    extra_data: { biceps: 6.0, cresta_iliaca: 11.0, p_brazo_rel: 27.0, p_brazo_flex: 28.5, p_cintura: 70.2, p_cadera: 96.5, p_pantorrilla: 35.0, d_humero: 6.2, d_femur: 9.4, d_biestiloideo: 5.1 }
+                }
+            ];
+
+            // Subir los 3 registros de golpe a Supabase
+            const { error } = await supabaseClient.from('evaluaciones').insert(evaluacionesDePrueba);
+            if (!error) {
+                alert("¡Datos de prueba inyectados de manera exitosa! Revisa el gráfico y el historial.");
+                cargarHistorialEvaluaciones();
+            } else {
+                alert("Error al inyectar: " + error.message);
+            }
+        });
+
+        // --- GUARDAR NUEVA EVALUACIÓN ---
         document.getElementById('isakForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -512,9 +770,8 @@
                     abdominal,
                     muslo,
                     pantorrilla,
-                    // Si no se pudo calcular la grasa, se guarda un valor genérico o 0 en el campo nativo de la BD
-                    pct_grasa: calcs.grasaDW !== "Datos insuficientes" ? parseFloat(calcs.grasaDW) : 0,
-                    suma_6: calcs.suma6 !== "N/A" ? parseFloat(calcs.suma6) : 0,
+                    pct_grasa: calcs.grasaDW !== "N/A" ? parseFloat(calcs.grasaDW) : 0,
+                    suma_6: calcs.suma6 > 0 ? parseFloat(calcs.suma6) : 0,
                     extra_data: extra_data
                 }
             ]);
