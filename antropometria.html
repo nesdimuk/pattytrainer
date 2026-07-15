@@ -181,11 +181,11 @@
     <!-- LÓGICA DE CONTROL DE LA APLICACIÓN -->
     <script>
         // ================= CONECTAR CON TU SUPABASE =================
-        // Reemplaza estos dos valores con las credenciales de tu consola de Supabase
         const SUPABASE_URL = "https://oovethvkpqabxayosdwq.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vdmV0aHZrcHFhYnhheW9zZHdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMjczMzksImV4cCI6MjA5OTcwMzMzOX0.MJfwnXSfnGyv2pMUuFWTyLN9lwmrswBWF-qb6TrspWY";
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Cambiamos el nombre a supabaseClient para evitar el SyntaxError con la variable global de la CDN
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Cuenta por detrás de escena para el acceso simplificado de Patty
         const CORREO_ENTRENADORA = "patty@trainer.com"; 
@@ -195,7 +195,7 @@
 
         // --- VERIFICACIÓN DE SESIÓN INICIAL ---
         async function verificarSesion() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 usuarioActual = session.user;
                 document.getElementById('user-display').textContent = `Administración Activa | Sesión Segura`;
@@ -215,7 +215,7 @@
             const errorDiv = document.getElementById('login-error');
 
             // Envío del correo estático con la clave ingresada por el usuario
-            const { data, error } = await supabase.auth.signInWithPassword({ 
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ 
                 email: CORREO_ENTRENADORA, 
                 password: password 
             });
@@ -231,7 +231,7 @@
 
         // --- CERRAR SESIÓN ---
         document.getElementById('btn-logout').addEventListener('click', async () => {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             location.reload();
         });
 
@@ -241,7 +241,7 @@
             const nombre = document.getElementById('nuevo-nombre').value;
             const email = document.getElementById('nuevo-email').value;
 
-            const { error } = await supabase.from('alumnos').insert([
+            const { error } = await supabaseClient.from('alumnos').insert([
                 { nombre, email, entrenadora_id: usuarioActual.id }
             ]);
 
@@ -255,7 +255,7 @@
 
         // --- CARGAR LISTADO DE ALUMNAS ---
         async function cargarAlumnos() {
-            const { data: alumnos, error } = await supabase
+            const { data: alumnos, error } = await supabaseClient
                 .from('alumnos')
                 .select('*')
                 .order('nombre', { ascending: true });
@@ -288,7 +288,7 @@
 
         // --- CARGAR HISTORIAL DE EVALUACIONES ---
         async function cargarHistorialEvaluaciones() {
-            const { data: evs, error } = await supabase
+            const { data: evs, error } = await supabaseClient
                 .from('evaluaciones')
                 .select('*')
                 .eq('alumno_id', alumnoSeleccionadoId)
@@ -361,7 +361,7 @@
             const pctGrasa = ((4.95 / densidad) - 4.50) * 100;
 
             // 4. Almacenamiento en la tabla 'evaluaciones' de Supabase
-            const { error } = await supabase.from('evaluaciones').insert([
+            const { error } = await supabaseClient.from('evaluaciones').insert([
                 {
                     alumno_id: alumnoSeleccionadoId,
                     edad, 
