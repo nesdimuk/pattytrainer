@@ -149,12 +149,14 @@
       display: inline-flex; align-items: center; gap: 12px;
       font-size: 11px; font-weight: 700; letter-spacing: 0.25em;
       text-transform: uppercase; color: var(--blush);
+      text-shadow: 0 1px 3px rgba(20,12,15,0.75), 0 2px 14px rgba(20,12,15,0.5);
       margin-bottom: 28px;
       opacity: 0; transform: translateY(16px);
       transition: opacity 0.8s ease 0.15s, transform 0.8s ease 0.15s;
     }
     .hero-eyebrow::before {
       content: ''; display: block; width: 32px; height: 1px; background: var(--blush);
+      box-shadow: 0 1px 3px rgba(20,12,15,0.6);
     }
     .hero-eyebrow.in { opacity: 1; transform: none; }
 
@@ -474,48 +476,6 @@
     .fade-up:nth-child(4) { transition-delay: 0.3s; }
     .fade-up:nth-child(5) { transition-delay: 0.4s; }
 
-    /* ── TWEAKS PANEL ────────────────────────────────────── */
-    .tp {
-      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-      width: 260px; background: #fff; border-radius: 10px;
-      box-shadow: 0 8px 40px rgba(36,24,29,0.22);
-      overflow: hidden; display: none; font-family: var(--font-body);
-    }
-    .tp.open { display: block; }
-    .tp-head {
-      background: var(--burgundy); color: var(--blush);
-      padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
-    }
-    .tp-close { color: var(--blush); font-size: 20px; line-height: 1; opacity: 0.8; transition: opacity 0.2s; }
-    .tp-close:hover { opacity: 1; }
-    .tp-body { padding: 18px; display: flex; flex-direction: column; gap: 20px; }
-    .tp-group { display: flex; flex-direction: column; gap: 9px; }
-    .tp-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #9A8A90; }
-    .tp-opts { display: flex; gap: 6px; flex-wrap: wrap; }
-    .tp-opt {
-      padding: 7px 13px; border: 1px solid #e0d8dc; border-radius: 2px;
-      font-size: 12px; font-weight: 500; color: #24181D; transition: all 0.18s;
-    }
-    .tp-opt.on { background: var(--burgundy); color: var(--blush); border-color: var(--burgundy); }
-    .tp-swatch {
-      width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .tp-swatch.on { border-color: #24181D; transform: scale(1.2); }
-
-    /* ── TWEAKS TOGGLE BTN ───────────────────────────────── */
-    .tp-toggle {
-      position: fixed; bottom: 24px; right: 24px; z-index: 9998;
-      background: var(--burgundy); color: var(--blush);
-      padding: 10px 18px; border-radius: 24px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-      box-shadow: 0 4px 20px rgba(36,24,29,0.25);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .tp-toggle:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(36,24,29,0.3); }
-    .tp.open + .tp-toggle { display: none; }
-
     /* ── RESPONSIVE ──────────────────────────────────────── */
     @media (max-width: 960px) {
       .nav-links { display: none; }
@@ -815,81 +775,7 @@
   </div>
 </footer>
 
-<!-- ── TWEAKS PANEL ────────────────────────────────────────── -->
-<div class="tp" id="tpanel">
-  <div class="tp-head">
-    Tweaks
-    <button class="tp-close" id="tpClose">×</button>
-  </div>
-  <div class="tp-body">
-    <div class="tp-group">
-      <div class="tp-lbl">Estilo visual</div>
-      <div class="tp-opts" id="themeOpts">
-        <button class="tp-opt on" data-theme="clasica">Clásica</button>
-        <button class="tp-opt" data-theme="editorial">Editorial</button>
-        <button class="tp-opt" data-theme="suave">Suave</button>
-      </div>
-    </div>
-    <div class="tp-group">
-      <div class="tp-lbl">Tipografía</div>
-      <div class="tp-opts" id="fontOpts">
-        <button class="tp-opt on" data-font="cormorant">Cormorant</button>
-        <button class="tp-opt" data-font="playfair">Playfair</button>
-      </div>
-    </div>
-    <div class="tp-group">
-      <div class="tp-lbl">Color principal</div>
-      <div class="tp-opts" id="accentOpts">
-        <div class="tp-swatch on" style="background:#5B313C" data-c="#5B313C" title="Burdeo"></div>
-        <div class="tp-swatch" style="background:#A35A4A" data-c="#A35A4A" title="Terracota"></div>
-        <div class="tp-swatch" style="background:#3D5A80" data-c="#3D5A80" title="Azul ciruela"></div>
-      </div>
-    </div>
-  </div>
-</div>
-<button class="tp-toggle" id="tpToggle">Tweaks</button>
-
 <script>
-  /* ── TWEAKS TOGGLE ──────────────────────────────────── */
-  document.getElementById('tpToggle').addEventListener('click', () => {
-    document.getElementById('tpanel').classList.add('open');
-  });
-  document.getElementById('tpClose').addEventListener('click', () => {
-    document.getElementById('tpanel').classList.remove('open');
-  });
-
-  /* Theme toggle */
-  document.getElementById('themeOpts').addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-theme]');
-    if (!btn) return;
-    document.querySelectorAll('#themeOpts .tp-opt').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    document.documentElement.dataset.theme = btn.dataset.theme;
-    updateNav();
-  });
-
-  /* Font toggle */
-  document.getElementById('fontOpts').addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-font]');
-    if (!btn) return;
-    document.querySelectorAll('#fontOpts .tp-opt').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    const map = {
-      cormorant: "'Cormorant Garamond', serif",
-      playfair:  "'Playfair Display', serif"
-    };
-    document.documentElement.style.setProperty('--font-display', map[btn.dataset.font]);
-  });
-
-  /* Accent color swatches */
-  document.getElementById('accentOpts').addEventListener('click', (e) => {
-    const sw = e.target.closest('[data-c]');
-    if (!sw) return;
-    document.querySelectorAll('#accentOpts .tp-swatch').forEach(s => s.classList.remove('on'));
-    sw.classList.add('on');
-    document.documentElement.style.setProperty('--burgundy', sw.dataset.c);
-  });
-
   /* ── NAV SCROLL ────────────────────────────────────── */
   const nav = document.getElementById('nav');
   function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 60); }
