@@ -760,7 +760,7 @@
                     const f = parseFecha(ev.fecha);
                     fechas.push(f.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }));
                     pesos.push(ev.peso);
-                    grasas.push(calc.grasaDW !== 'N/A' ? parseFloat(calc.grasaDW) : null);
+                    grasas.push(calc.grasaDW !== 'N/A' ? parseFloat(calc.grasaDW) : (ev.pct_grasa ? parseFloat(ev.pct_grasa) : null));
                     sumas6.push(calc.suma6 > 0 ? calc.suma6 : null);
                 });
 
@@ -778,6 +778,32 @@
                     const extra    = ev.extra_data || {};
                     const notas    = extra.notas || '';
 
+                    // Suma 4 pliegues Durnin: bíceps+tríceps+subescapular+cresta_iliaca
+                    const b4 = parseFloat(extra.biceps) || 0;
+                    const t4 = parseFloat(ev.triceps) || 0;
+                    const se4 = parseFloat(ev.subescapular) || 0;
+                    const ci4 = parseFloat(extra.cresta_iliaca) || 0;
+                    const suma4 = (b4 > 0 && t4 > 0 && se4 > 0 && ci4 > 0) ? parseFloat((b4 + t4 + se4 + ci4).toFixed(1)) : 0;
+
+                    // Pliegues disponibles para mostrar
+                    const plieguesDisp = [];
+                    if (ev.triceps)         plieguesDisp.push(`Tríceps: ${ev.triceps} mm`);
+                    if (ev.subescapular)    plieguesDisp.push(`Subescapular: ${ev.subescapular} mm`);
+                    if (extra.biceps)       plieguesDisp.push(`Bíceps: ${extra.biceps} mm`);
+                    if (extra.cresta_iliaca)plieguesDisp.push(`Cresta Ilíaca: ${extra.cresta_iliaca} mm`);
+                    if (ev.supraespinal)    plieguesDisp.push(`Supraespinal: ${ev.supraespinal} mm`);
+                    if (ev.abdominal)       plieguesDisp.push(`Abdominal: ${ev.abdominal} mm`);
+                    if (ev.muslo)           plieguesDisp.push(`Muslo: ${ev.muslo} mm`);
+                    if (ev.pantorrilla)     plieguesDisp.push(`Pantorrilla: ${ev.pantorrilla} mm`);
+
+                    // Perímetros disponibles
+                    const perimetrosDisp = [];
+                    if (extra.p_cintura)    perimetrosDisp.push(`Cintura: ${extra.p_cintura} cm`);
+                    if (extra.p_cadera)     perimetrosDisp.push(`Cadera: ${extra.p_cadera} cm`);
+                    if (extra.p_brazo_rel)  perimetrosDisp.push(`Brazo Rel.: ${extra.p_brazo_rel} cm`);
+                    if (extra.p_brazo_flex) perimetrosDisp.push(`Brazo Flex.: ${extra.p_brazo_flex} cm`);
+                    if (extra.p_pantorrilla)perimetrosDisp.push(`Pantorrilla: ${extra.p_pantorrilla} cm`);
+
                     // Deltas respecto a evaluación anterior
                     const deltaPeso  = prevEv   ? parseFloat((ev.peso - prevEv.peso).toFixed(1))                      : null;
                     const deltaIMC   = prevCalc ? parseFloat((parseFloat(calc.imc) - parseFloat(prevCalc.imc)).toFixed(1)) : null;
@@ -785,6 +811,10 @@
                         ? parseFloat((parseFloat(calc.grasaDW) - parseFloat(prevCalc.grasaDW)).toFixed(1)) : null;
                     const deltaSuma6 = (calc.suma6 > 0 && prevCalc?.suma6 > 0 && prevCalc)
                         ? parseFloat((calc.suma6 - prevCalc.suma6).toFixed(1)) : null;
+
+                    // Grasa a mostrar: calculada o registrada como fallback
+                    const grasaMostrar = calc.grasaDW !== 'N/A' ? calc.grasaDW + '%'
+                        : (ev.pct_grasa ? `${ev.pct_grasa}% <span style="font-size:9px;color:#8a7a78;">(registrado)</span>` : 'Datos insuf.');
 
                     const card = document.createElement('div');
                     card.className = 'p-5 bg-stone-50 rounded-2xl border border-stone-200/80 shadow-sm space-y-4';
@@ -807,24 +837,41 @@
                             </div>
                             <div class="bg-white rounded-lg p-2.5 border border-stone-100">
                                 <span class="text-gray-400 block">Talla</span>
-                                <strong class="text-stone-800 text-sm">${ev.talla} cm</strong>
+                                <strong class="text-stone-800 text-sm">${ev.talla ? ev.talla + ' cm' : 'N/A'}</strong>
                             </div>
                             <div class="bg-white rounded-lg p-2.5 border border-stone-100">
                                 <span class="text-gray-400 block">IMC</span>
-                                <strong class="text-stone-800 text-sm">${calc.imc}</strong>
-                                <div class="mt-1"><span class="preview-cat ${imcCat.clase}" style="font-size:9px;padding:1px 6px;border-radius:99px;font-weight:700;">${imcCat.texto}</span></div>
-                                ${deltaIMC !== null ? `<div class="mt-0.5 text-xs">${formatDelta(deltaIMC, '')}</div>` : ''}
+                                <strong class="text-stone-800 text-sm">${ev.talla ? calc.imc : 'N/A'}</strong>
+                                ${ev.talla ? `<div class="mt-1"><span class="preview-cat ${imcCat.clase}" style="font-size:9px;padding:1px 6px;border-radius:99px;font-weight:700;">${imcCat.texto}</span></div>` : ''}
+                                ${deltaIMC !== null && ev.talla ? `<div class="mt-0.5 text-xs">${formatDelta(deltaIMC, '')}</div>` : ''}
                             </div>
                             <div class="bg-white rounded-lg p-2.5 border border-stone-100">
-                                <span class="text-gray-400 block">Suma 6 Pliegues</span>
-                                <strong class="text-stone-800 text-sm">${calc.suma6 > 0 ? calc.suma6 + ' mm' : 'N/A'}</strong>
+                                <span class="text-gray-400 block">${suma4 > 0 ? 'Suma 4 (Durnin)' : 'Suma 6 Pliegues'}</span>
+                                <strong class="text-stone-800 text-sm">${suma4 > 0 ? suma4 + ' mm' : (calc.suma6 > 0 ? calc.suma6 + ' mm' : 'N/A')}</strong>
                                 ${deltaSuma6 !== null ? `<div class="mt-0.5 text-xs">${formatDelta(deltaSuma6, ' mm')}</div>` : ''}
                             </div>
                             <div class="bg-white rounded-lg p-2.5 border border-stone-100">
-                                <span class="text-gray-400 block">Suma 8 Pliegues</span>
-                                <strong class="text-stone-800 text-sm">${calc.suma8 > 0 ? calc.suma8 + ' mm' : 'N/A'}</strong>
+                                <span class="text-gray-400 block">% Grasa</span>
+                                <strong class="text-stone-800 text-sm">${grasaMostrar}</strong>
+                                ${deltaGrasa !== null ? `<div class="mt-0.5 text-xs">${formatDelta(deltaGrasa, '%')}</div>` : ''}
                             </div>
                         </div>
+
+                        ${plieguesDisp.length > 0 ? `
+                        <div class="border-t pt-3">
+                            <h5 class="text-xs font-bold text-[#b08b82] uppercase mb-2">Pliegues Cutáneos</h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${plieguesDisp.map(p => `<span class="text-xs bg-white border border-stone-200 rounded-lg px-2.5 py-1.5">${p}</span>`).join('')}
+                            </div>
+                        </div>` : ''}
+
+                        ${perimetrosDisp.length > 0 ? `
+                        <div class="border-t pt-3">
+                            <h5 class="text-xs font-bold text-[#b08b82] uppercase mb-2">Perímetros</h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${perimetrosDisp.map(p => `<span class="text-xs bg-white border border-stone-200 rounded-lg px-2.5 py-1.5">${p}</span>`).join('')}
+                            </div>
+                        </div>` : ''}
 
                         <div class="border-t pt-3">
                             <h5 class="text-xs font-bold text-[#b08b82] uppercase mb-2">Resultados de Fórmulas</h5>
@@ -832,6 +879,7 @@
                                 <div>
                                     <span class="text-gray-500 font-semibold block mb-1">Grasa Corporal:</span>
                                     <ul class="space-y-0.5">
+                                        ${ev.pct_grasa ? `<li>Registrado: <strong class="text-emerald-700">${ev.pct_grasa}%</strong></li>` : ''}
                                         <li>Durnin-Womersley: <strong>${calc.grasaDW !== 'N/A' ? calc.grasaDW + '%' : 'Datos insuf.'}</strong>
                                             ${deltaGrasa !== null ? formatDelta(deltaGrasa, '%') : ''}</li>
                                         <li>Yuhasz: <strong>${calc.grasaYuhasz !== 'N/A' ? calc.grasaYuhasz + '%' : 'Datos insuf.'}</strong></li>
