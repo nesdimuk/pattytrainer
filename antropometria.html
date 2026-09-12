@@ -1807,36 +1807,64 @@
 
                     <div class="pi-section-title">Gráfico de Evolución</div>
                     ${(() => {
-                        // Intentar capturar el gráfico Chart.js existente
-                        const canvas = document.getElementById('graficaEvolutiva');
-                        if (canvas && miGrafico) {
-                            try {
-                                const imgData = canvas.toDataURL('image/png');
-                                return `<img src="${imgData}" style="width:100%;max-height:220px;object-fit:contain;border:1px solid #f0ebe6;border-radius:8px;padding:8px;background:#fff;" alt="Gráfico de evolución">`;
-                            } catch(e) {}
+                        const vals = evsConCalc; // orden ASC
+                        const n = vals.length;
+                        if (n === 0) return '';
+                        const W = 500, H = 180, PL = 44, PR = 16, PT = 24, PB = 36;
+                        const CW = W - PL - PR, CH = H - PT - PB;
+
+                        // Peso: línea + puntos
+                        const pesos = vals.map(v => parseFloat(v.ev.peso) || 0);
+                        const maxP = Math.max(...pesos), minP = Math.min(...pesos);
+                        const rangeP = maxP - minP || 1;
+                        const xOf = i => PL + (n === 1 ? CW/2 : i * CW / (n-1));
+                        const yOfP = v => PT + CH - ((v - minP) / rangeP) * CH;
+
+                        const pesoPath = pesos.map((p, i) => `${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOfP(p).toFixed(1)}`).join(' ');
+                        const pesoPoints = pesos.map((p, i) => `<circle cx="${xOf(i).toFixed(1)}" cy="${yOfP(p).toFixed(1)}" r="3" fill="#b08b82"/>`).join('');
+                        const pesoLabels = pesos.map((p, i) => `<text x="${xOf(i).toFixed(1)}" y="${(yOfP(p)-6).toFixed(1)}" text-anchor="middle" font-size="8" fill="#4a3e3d" font-weight="600">${p}</text>`).join('');
+
+                        // % Grasa: línea secundaria eje derecho
+                        const grasas = vals.map(v => {
+                            const g = v.calc.grasaDW !== 'N/A' ? parseFloat(v.calc.grasaDW) : (v.ev.pct_grasa ? parseFloat(v.ev.pct_grasa) : null);
+                            return g;
+                        });
+                        const grasasVal = grasas.filter(g => g !== null);
+                        let grasaPathEl = '';
+                        if (grasasVal.length >= 2) {
+                            const maxG = Math.max(...grasasVal), minG = Math.min(...grasasVal);
+                            const rangeG = maxG - minG || 1;
+                            const yOfG = v => PT + CH - ((v - minG) / rangeG) * CH;
+                            const gPts = grasas.map((g, i) => g !== null ? `${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOfG(g).toFixed(1)}` : null).filter(Boolean).join(' ');
+                            const gCircles = grasas.map((g, i) => g !== null ? `<circle cx="${xOf(i).toFixed(1)}" cy="${yOfG(g).toFixed(1)}" r="2.5" fill="#7c9e6e"/>` : '').join('');
+                            grasaPathEl = `<path d="${gPts}" fill="none" stroke="#7c9e6e" stroke-width="1.5" stroke-dasharray="5,3"/>
+                                ${gCircles}
+                                <text x="${W-PR}" y="${PT-6}" text-anchor="end" font-size="7.5" fill="#7c9e6e">— % Grasa</text>`;
                         }
-                        // Fallback: SVG inline de barras de peso + línea % grasa
-                        const vals = evsConCalc;
-                        const maxP = Math.max(...vals.map(v => v.ev.peso || 0)) * 1.05;
-                        const minP = Math.min(...vals.map(v => v.ev.peso || 0)) * 0.95;
-                        const W = 520, H = 150, PAD = 40, barW = Math.min(30, (W - PAD*2) / vals.length - 6);
-                        const xPos = (i) => PAD + (i + 0.5) * ((W - PAD*2) / vals.length);
-                        const yPos = (v) => H - PAD - ((v - minP) / (maxP - minP || 1)) * (H - PAD*2);
-                        const bars = vals.map((v, i) => {
-                            const x = xPos(i) - barW/2, y = yPos(v.ev.peso), h = H - PAD - y;
-                            const label = parseFecha(v.ev.fecha).toLocaleDateString('es-ES',{month:'short',year:'2-digit'});
-                            return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="#b08b82" rx="3" opacity="0.8"/>
-                                    <text x="${xPos(i)}" y="${H-PAD+12}" text-anchor="middle" font-size="7" fill="#78716c">${label}</text>
-                                    <text x="${xPos(i)}" y="${y-3}" text-anchor="middle" font-size="7" fill="#4a3e3d" font-weight="600">${v.ev.peso}</text>`;
+
+                        // Etiquetas eje X (fechas)
+                        const xLabels = vals.map((v, i) => {
+                            const f = parseFecha(v.ev.fecha).toLocaleDateString('es-ES',{day:'2-digit',month:'short'});
+                            return `<text x="${xOf(i).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="7.5" fill="#78716c">${f}</text>`;
                         }).join('');
-                        const grasaPoints = vals.map((v, i) => {
-                            const g = v.calc.grasaDW !== 'N/A' ? parseFloat(v.calc.grasaDW) : (v.ev.pct_grasa || null);
-                            return g !== null ? `${xPos(i)},${yPos(minP + (g/100)*(maxP-minP))}` : null;
-                        }).filter(Boolean).join(' ');
-                        return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;border:1px solid #f0ebe6;border-radius:8px;background:#fff;padding:4px;">
-                            <text x="${W/2}" y="14" text-anchor="middle" font-size="9" fill="#a8927f" font-weight="600">EVOLUCIÓN DE PESO (kg)</text>
-                            ${bars}
-                            ${grasaPoints ? `<polyline points="${grasaPoints}" fill="none" stroke="#7c9e6e" stroke-width="1.5" stroke-dasharray="4,2"/>` : ''}
+
+                        // Grid lines y etiquetas eje Y
+                        const yLines = [0, 0.25, 0.5, 0.75, 1].map(t => {
+                            const y = (PT + CH - t * CH).toFixed(1);
+                            const val = (minP + t * rangeP).toFixed(1);
+                            return `<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#f0ebe6" stroke-width="1"/>
+                                    <text x="${PL-4}" y="${parseFloat(y)+3}" text-anchor="end" font-size="7" fill="#a8927f">${val}</text>`;
+                        }).join('');
+
+                        return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;border:1px solid #f0ebe6;border-radius:8px;background:#fff;">
+                            <text x="${W/2}" y="14" text-anchor="middle" font-size="8.5" fill="#a8927f" font-weight="600" letter-spacing="0.05em">EVOLUCIÓN — PESO (kg)</text>
+                            ${yLines}
+                            <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+CH}" stroke="#e7e0dc" stroke-width="1"/>
+                            <path d="${pesoPath}" fill="none" stroke="#b08b82" stroke-width="2"/>
+                            ${pesoPoints}
+                            ${pesoLabels}
+                            ${grasaPathEl}
+                            ${xLabels}
                         </svg>`;
                     })()}
 
