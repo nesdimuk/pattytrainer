@@ -162,7 +162,7 @@
 
                 <!-- Columna 1: Mis Alumnas -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 h-fit lg:col-span-1">
-                    <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold" id="titulo-gestion-alumna">Mis Alumnas</h3>
+                    <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold" id="titulo-gestion-alumna">Mis Alumnos</h3>
 
                     <form id="registroAlumnaForm" class="mb-6 space-y-3">
                         <input type="hidden" id="alumna-edit-id" value="">
@@ -192,7 +192,7 @@
                         </div>
                         <div class="flex gap-2">
                             <button type="submit" id="btn-submit-alumna" class="flex-grow bg-[#b08b82] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#c2a69f] transition uppercase tracking-wider">
-                                + Registrar Alumna
+                                + Registrar Alumno/a
                             </button>
                             <button type="button" id="btn-cancelar-edicion" class="hidden text-xs bg-stone-200 text-stone-700 px-3 py-2.5 rounded-lg hover:bg-stone-300 transition">
                                 Cancelar
@@ -465,7 +465,7 @@
                 </button>
                 <p id="import-status" class="text-xs text-red-500 text-center"></p>
                 <div id="import-preview" class="hidden">
-                    <h3 class="text-sm font-semibold text-stone-700 mb-3">Datos detectados — asigna cada evaluación a una alumna:</h3>
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">Datos detectados — asigna cada evaluación a un alumno:</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead class="bg-stone-50">
@@ -474,7 +474,7 @@
                                     <th class="py-2 px-3">Fecha</th>
                                     <th class="py-2 px-3">Peso</th>
                                     <th class="py-2 px-3">Pliegues</th>
-                                    <th class="py-2 px-3">Alumna en sistema</th>
+                                    <th class="py-2 px-3">Alumno en sistema</th>
                                 </tr>
                             </thead>
                             <tbody id="import-preview-tbody"></tbody>
@@ -622,17 +622,17 @@
             const sexo       = document.getElementById('nuevo-sexo').value;
             const talla_ref  = parseFloat(document.getElementById('nuevo-talla-ref').value) || null;
 
-            setLoading('btn-submit-alumna', true, id ? 'Guardar Cambios' : '+ Registrar Alumna', 'Guardando...');
+            setLoading('btn-submit-alumna', true, id ? 'Guardar Cambios' : '+ Registrar Alumno/a', 'Guardando...');
 
             if (id) {
                 const { error } = await supabaseClient.from('pt_alumnos').update({ nombre, email, nacimiento, sexo, talla_ref }).eq('id', id);
-                setLoading('btn-submit-alumna', false, '+ Registrar Alumna', 'Guardando...');
-                if (!error) { resetearFormularioAlumna(); cargarAlumnos(); mostrarToast('Alumna actualizada con éxito.'); }
+                setLoading('btn-submit-alumna', false, '+ Registrar Alumno/a', 'Guardando...');
+                if (!error) { resetearFormularioAlumna(); cargarAlumnos(); mostrarToast('Alumno/a actualizado con éxito.'); }
                 else mostrarToast('Error al actualizar: ' + error.message, 'error');
             } else {
                 const { error } = await supabaseClient.from('pt_alumnos').insert([{ nombre, email, entrenadora_id: usuarioActual.id, nacimiento, sexo, talla_ref }]);
-                setLoading('btn-submit-alumna', false, '+ Registrar Alumna', 'Guardando...');
-                if (!error) { document.getElementById('registroAlumnaForm').reset(); cargarAlumnos(); mostrarToast('Alumna registrada.'); }
+                setLoading('btn-submit-alumna', false, '+ Registrar Alumno/a', 'Guardando...');
+                if (!error) { document.getElementById('registroAlumnaForm').reset(); cargarAlumnos(); mostrarToast('Alumno/a registrado.'); }
                 else mostrarToast('Error al registrar: ' + error.message, 'error');
             }
         });
@@ -646,8 +646,8 @@
             document.getElementById('nuevo-nacimiento').value = '';
             document.getElementById('nuevo-sexo').value = 'femenino';
             document.getElementById('nuevo-talla-ref').value = '';
-            document.getElementById('titulo-gestion-alumna').textContent = 'Mis Alumnas';
-            document.getElementById('btn-submit-alumna').textContent = '+ Registrar Alumna';
+            document.getElementById('titulo-gestion-alumna').textContent = 'Mis Alumnos';
+            document.getElementById('btn-submit-alumna').textContent = '+ Registrar Alumno/a';
             document.getElementById('btn-cancelar-edicion').classList.add('hidden');
         }
 
@@ -1512,7 +1512,7 @@
                     <td class="py-2 px-3">${[ev.triceps, ev.subescapular, ev.supraespinal, ev.abdominal, ev.muslo, ev.pantorrilla].filter(Boolean).join(', ') || '—'}</td>
                     <td class="py-2 px-3">
                         <select class="import-alumna-sel border rounded px-1 py-0.5 text-xs" data-idx="${i}">
-                            <option value="">Seleccionar alumna...</option>
+                            <option value="">Seleccionar alumno...</option>
                         </select>
                     </td>`;
                 tbody.appendChild(tr);
@@ -1580,7 +1580,7 @@
             }
 
             if (errores > 0) {
-                document.getElementById('import-status').textContent = `⚠ ${errores} fila(s) sin alumna asignada o con error al crear.`;
+                document.getElementById('import-status').textContent = `⚠ ${errores} fila(s) sin alumno asignado o con error al crear.`;
                 return;
             }
 
@@ -1804,6 +1804,41 @@
                         <thead><tr><th>Fecha</th><th>Edad</th><th>Peso</th><th>Talla</th><th>IMC</th><th>% Grasa</th><th>Suma Pliegues</th></tr></thead>
                         <tbody>${resumenRows}</tbody>
                     </table>
+
+                    <div class="pi-section-title">Gráfico de Evolución</div>
+                    ${(() => {
+                        // Intentar capturar el gráfico Chart.js existente
+                        const canvas = document.getElementById('graficaEvolutiva');
+                        if (canvas && miGrafico) {
+                            try {
+                                const imgData = canvas.toDataURL('image/png');
+                                return `<img src="${imgData}" style="width:100%;max-height:220px;object-fit:contain;border:1px solid #f0ebe6;border-radius:8px;padding:8px;background:#fff;" alt="Gráfico de evolución">`;
+                            } catch(e) {}
+                        }
+                        // Fallback: SVG inline de barras de peso + línea % grasa
+                        const vals = evsConCalc;
+                        const maxP = Math.max(...vals.map(v => v.ev.peso || 0)) * 1.05;
+                        const minP = Math.min(...vals.map(v => v.ev.peso || 0)) * 0.95;
+                        const W = 520, H = 150, PAD = 40, barW = Math.min(30, (W - PAD*2) / vals.length - 6);
+                        const xPos = (i) => PAD + (i + 0.5) * ((W - PAD*2) / vals.length);
+                        const yPos = (v) => H - PAD - ((v - minP) / (maxP - minP || 1)) * (H - PAD*2);
+                        const bars = vals.map((v, i) => {
+                            const x = xPos(i) - barW/2, y = yPos(v.ev.peso), h = H - PAD - y;
+                            const label = parseFecha(v.ev.fecha).toLocaleDateString('es-ES',{month:'short',year:'2-digit'});
+                            return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="#b08b82" rx="3" opacity="0.8"/>
+                                    <text x="${xPos(i)}" y="${H-PAD+12}" text-anchor="middle" font-size="7" fill="#78716c">${label}</text>
+                                    <text x="${xPos(i)}" y="${y-3}" text-anchor="middle" font-size="7" fill="#4a3e3d" font-weight="600">${v.ev.peso}</text>`;
+                        }).join('');
+                        const grasaPoints = vals.map((v, i) => {
+                            const g = v.calc.grasaDW !== 'N/A' ? parseFloat(v.calc.grasaDW) : (v.ev.pct_grasa || null);
+                            return g !== null ? `${xPos(i)},${yPos(minP + (g/100)*(maxP-minP))}` : null;
+                        }).filter(Boolean).join(' ');
+                        return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;border:1px solid #f0ebe6;border-radius:8px;background:#fff;padding:4px;">
+                            <text x="${W/2}" y="14" text-anchor="middle" font-size="9" fill="#a8927f" font-weight="600">EVOLUCIÓN DE PESO (kg)</text>
+                            ${bars}
+                            ${grasaPoints ? `<polyline points="${grasaPoints}" fill="none" stroke="#7c9e6e" stroke-width="1.5" stroke-dasharray="4,2"/>` : ''}
+                        </svg>`;
+                    })()}
 
                     <div class="pi-section-title">Detalle por Evaluación</div>
                     ${cardsHTML}
