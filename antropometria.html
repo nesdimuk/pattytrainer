@@ -682,7 +682,7 @@
 
             // Durnin usa suprailiaco; aceptar cresta_iliaca como equivalente si no hay supraespinal
             const suprailiacDW = raw.supraespinal > 0 ? raw.supraespinal : (raw.cresta_iliaca > 0 ? raw.cresta_iliaca : 0);
-            if ([raw.biceps, raw.triceps, raw.subescapular, suprailiacDW].every(v => v > 0)) {
+            if (edad > 0 && sexo && [raw.biceps, raw.triceps, raw.subescapular, suprailiacDW].every(v => v > 0)) {
                 const suma4 = raw.biceps + raw.triceps + raw.subescapular + suprailiacDW;
                 const logS4 = Math.log10(suma4);
                 let dDW = 0;
@@ -899,7 +899,7 @@
                                 <button onclick="confirmarEliminarEvaluacion('${ev.id}')" class="text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition">
                                     Borrar Reg.
                                 </button>
-                                <span class="text-xs bg-stone-200/60 px-2 py-0.5 rounded-full font-semibold">Edad: ${ev.edad} años</span>
+                                ${ev.edad ? `<span class="text-xs bg-stone-200/60 px-2 py-0.5 rounded-full font-semibold">Edad: ${ev.edad} años</span>` : `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold" title="La edad es necesaria para calcular % grasa (Durnin)">⚠️ Sin edad — <button onclick="abrirEditarEvaluacion('${ev.id}')" class="underline">agregar</button></span>`}
                             </div>
                         </div>
 
