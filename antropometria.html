@@ -116,9 +116,14 @@
                     <h1 class="text-2xl md:text-3xl font-serif text-[#4a3e3d] font-semibold">Panel Antropométrico Profesional ISAK 1</h1>
                     <p class="text-xs text-stone-500" id="user-display">Sesión activa como entrenadora</p>
                 </div>
-                <button id="btn-logout" class="text-xs border border-stone-200 hover:bg-stone-50 text-stone-600 px-4 py-2 rounded-lg transition font-medium">
-                    Cerrar Sesión
-                </button>
+                <div class="flex gap-2">
+                    <button id="btn-abrir-importar" class="text-xs bg-[#b08b82] hover:bg-[#c2a69f] text-white px-4 py-2 rounded-lg transition font-medium">
+                        ↑ Importar Evaluaciones
+                    </button>
+                    <button id="btn-logout" class="text-xs border border-stone-200 hover:bg-stone-50 text-stone-600 px-4 py-2 rounded-lg transition font-medium">
+                        Cerrar Sesión
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -975,6 +980,289 @@
         });
 
         verificarSesion();
+
+        // ── IMPORTAR EVALUACIONES ──
+        const IMPORT_FUNCTION_URL = 'https://supabase.saidcoach.com/functions/v1/pt-importar';
+        const IMPORT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNjQxNzY5MjAwLCJleHAiOjE3OTk1MzU2MDB9.zfTwsA1JbNTMIX8u3NdGQIVqSl1XbwZPJKEb9bxK0RM';
+        let importarPendientes = [];
+
+        document.getElementById('btn-abrir-importar').addEventListener('click', () => {
+            document.getElementById('modal-importar').classList.remove('hidden');
+            resetImportModal();
+        });
+        document.getElementById('modal-importar-close').addEventListener('click', () => {
+            document.getElementById('modal-importar').classList.add('hidden');
+        });
+
+        function resetImportModal() {
+            document.getElementById('import-tab-texto').click();
+            document.getElementById('import-texto').value = '';
+            document.getElementById('import-archivo').value = '';
+            document.getElementById('import-imagen').value = '';
+            document.getElementById('import-preview').classList.add('hidden');
+            document.getElementById('import-status').textContent = '';
+            importarPendientes = [];
+        }
+
+        // Tabs
+        ['texto','excel','imagen'].forEach(tab => {
+            document.getElementById(`import-tab-${tab}`).addEventListener('click', () => {
+                ['texto','excel','imagen'].forEach(t => {
+                    document.getElementById(`import-tab-${t}`).classList.toggle('bg-[#4a3e3d]', t === tab);
+                    document.getElementById(`import-tab-${t}`).classList.toggle('text-white', t === tab);
+                    document.getElementById(`import-tab-${t}`).classList.toggle('bg-stone-100', t !== tab);
+                    document.getElementById(`import-tab-${t}`).classList.toggle('text-stone-600', t !== tab);
+                    document.getElementById(`import-panel-${t}`).classList.toggle('hidden', t !== tab);
+                });
+            });
+        });
+
+        // Analizar
+        document.getElementById('btn-import-analizar').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-import-analizar');
+            btn.disabled = true;
+            btn.textContent = 'Analizando con IA...';
+            document.getElementById('import-status').textContent = '';
+            importarPendientes = [];
+
+            try {
+                const activeTab = document.querySelector('[id^="import-tab-"].bg-\\[\\#4a3e3d\\]')?.id?.replace('import-tab-','') || 'texto';
+
+                let payload;
+
+                if (activeTab === 'texto') {
+                    const texto = document.getElementById('import-texto').value.trim();
+                    if (!texto) throw new Error('Escribe o pega el texto primero.');
+                    payload = { tipo: 'texto', contenido: texto };
+
+                } else if (activeTab === 'excel') {
+                    const file = document.getElementById('import-archivo').files[0];
+                    if (!file) throw new Error('Selecciona un archivo Excel o CSV.');
+                    const texto = await leerExcelComoTexto(file);
+                    payload = { tipo: 'texto', contenido: texto };
+
+                } else if (activeTab === 'imagen') {
+                    const file = document.getElementById('import-imagen').files[0];
+                    if (!file) throw new Error('Selecciona una imagen.');
+                    const base64 = await fileToBase64(file);
+                    payload = { tipo: 'imagen_base64', contenido: base64 };
+                }
+
+                const res = await fetch(IMPORT_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: { 'apikey': IMPORT_ANON_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+
+                importarPendientes = data.evaluaciones;
+                mostrarPreviewImport(importarPendientes);
+
+            } catch (e) {
+                document.getElementById('import-status').textContent = '⚠ ' + e.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Analizar con IA';
+            }
+        });
+
+        function fileToBase64(file) {
+            return new Promise((res, rej) => {
+                const reader = new FileReader();
+                reader.onload = e => res(e.target.result.split(',')[1]);
+                reader.onerror = rej;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function leerExcelComoTexto(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    try {
+                        // CSV simple
+                        if (file.name.endsWith('.csv')) {
+                            resolve(e.target.result);
+                            return;
+                        }
+                        // Para xlsx usamos SheetJS si está disponible
+                        if (window.XLSX) {
+                            const wb = window.XLSX.read(e.target.result, { type: 'binary' });
+                            const ws = wb.Sheets[wb.SheetNames[0]];
+                            resolve(window.XLSX.utils.sheet_to_csv(ws));
+                        } else {
+                            resolve(e.target.result);
+                        }
+                    } catch(err) { reject(err); }
+                };
+                reader.onerror = reject;
+                file.name.endsWith('.csv') ? reader.readAsText(file) : reader.readAsBinaryString(file);
+            });
+        }
+
+        function mostrarPreviewImport(evals) {
+            const container = document.getElementById('import-preview');
+            const tbody = document.getElementById('import-preview-tbody');
+            tbody.innerHTML = '';
+            evals.forEach((ev, i) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-stone-100 text-xs';
+                tr.innerHTML = `
+                    <td class="py-2 px-3">${ev.nombre_alumna || '—'}</td>
+                    <td class="py-2 px-3">${ev.fecha || '—'}</td>
+                    <td class="py-2 px-3">${ev.peso || '—'}</td>
+                    <td class="py-2 px-3">${[ev.triceps, ev.subescapular, ev.supraespinal, ev.abdominal, ev.muslo, ev.pantorrilla].filter(Boolean).join(', ') || '—'}</td>
+                    <td class="py-2 px-3">
+                        <select class="import-alumna-sel border rounded px-1 py-0.5 text-xs" data-idx="${i}">
+                            <option value="">Seleccionar alumna...</option>
+                        </select>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+
+            // Poblar selects con alumnas actuales
+            supabaseClient.from('pt_alumnos').select('id,nombre').order('nombre').then(({ data }) => {
+                document.querySelectorAll('.import-alumna-sel').forEach(sel => {
+                    (data || []).forEach(al => {
+                        const opt = document.createElement('option');
+                        opt.value = al.id;
+                        opt.textContent = al.nombre;
+                        // Autoseleccionar si el nombre coincide
+                        const evNombre = (evals[parseInt(sel.dataset.idx)]?.nombre_alumna || '').toLowerCase();
+                        if (al.nombre.toLowerCase().includes(evNombre.split(' ')[0]) && evNombre) opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+                });
+            });
+
+            container.classList.remove('hidden');
+        }
+
+        document.getElementById('btn-import-confirmar').addEventListener('click', async () => {
+            const sels = document.querySelectorAll('.import-alumna-sel');
+            const filas = [];
+            let errores = 0;
+
+            sels.forEach((sel, i) => {
+                const alumno_id = sel.value;
+                if (!alumno_id) { errores++; return; }
+                const ev = importarPendientes[i];
+                const extra_data = {
+                    biceps: ev.biceps, cresta_iliaca: ev.cresta_iliaca,
+                    p_brazo_rel: ev.p_brazo_rel, p_brazo_flex: ev.p_brazo_flex,
+                    p_cintura: ev.p_cintura, p_cadera: ev.p_cadera, p_pantorrilla: ev.p_pantorrilla,
+                    d_humero: ev.d_humero, d_femur: ev.d_femur, d_biestiloideo: ev.d_biestiloideo,
+                    notas: ev.notas,
+                };
+                filas.push({
+                    alumno_id,
+                    fecha: ev.fecha,
+                    edad: ev.edad,
+                    sexo: ev.sexo,
+                    peso: ev.peso,
+                    talla: ev.talla,
+                    triceps: ev.triceps,
+                    subescapular: ev.subescapular,
+                    supraespinal: ev.supraespinal,
+                    abdominal: ev.abdominal,
+                    muslo: ev.muslo,
+                    pantorrilla: ev.pantorrilla,
+                    pct_grasa: ev.pct_grasa,
+                    suma_6: ev.suma_6,
+                    extra_data,
+                });
+            });
+
+            if (errores > 0) {
+                document.getElementById('import-status').textContent = `⚠ Asigna alumna a las ${errores} filas pendientes.`;
+                return;
+            }
+            if (filas.length === 0) {
+                document.getElementById('import-status').textContent = '⚠ No hay evaluaciones para guardar.';
+                return;
+            }
+
+            const btn = document.getElementById('btn-import-confirmar');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            const { error } = await supabaseClient.from('pt_evaluaciones').insert(filas);
+            btn.disabled = false;
+            btn.textContent = 'Confirmar y Guardar';
+
+            if (!error) {
+                mostrarToast(`${filas.length} evaluación(es) importadas correctamente.`);
+                document.getElementById('modal-importar').classList.add('hidden');
+                if (alumnoSeleccionado) cargarHistorialEvaluaciones();
+            } else {
+                document.getElementById('import-status').textContent = '⚠ Error: ' + error.message;
+            }
+        });
+
     </script>
+
+    <!-- MODAL IMPORTAR -->
+    <div id="modal-importar" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-stone-100">
+                <h2 class="text-xl font-serif text-[#4a3e3d] font-semibold">Importar Evaluaciones Históricas</h2>
+                <button id="modal-importar-close" class="text-stone-400 hover:text-stone-600 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 space-y-5">
+                <!-- Tabs -->
+                <div class="flex gap-2">
+                    <button id="import-tab-texto" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-[#4a3e3d] text-white">Texto / Pegado</button>
+                    <button id="import-tab-excel" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-stone-100 text-stone-600">Excel / CSV</button>
+                    <button id="import-tab-imagen" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-stone-100 text-stone-600">Imagen / Foto</button>
+                </div>
+                <!-- Panel Texto -->
+                <div id="import-panel-texto">
+                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Pega texto, tabla, mensaje, etc.</label>
+                    <textarea id="import-texto" rows="6" placeholder="Ej: María, 15/03/2024, peso 62kg, talla 165cm, tríceps 14mm, subescapular 12mm..." class="w-full text-sm border rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-[#c2a69f] resize-none"></textarea>
+                </div>
+                <!-- Panel Excel -->
+                <div id="import-panel-excel" class="hidden">
+                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube un archivo Excel (.xlsx) o CSV</label>
+                    <input type="file" id="import-archivo" accept=".xlsx,.xls,.csv" class="w-full text-sm border rounded-lg p-3 file:mr-3 file:text-xs file:bg-[#b08b82] file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:font-semibold">
+                    <p class="text-xs text-stone-400 mt-2">La IA interpretará las columnas automáticamente, sin importar el orden o los nombres de las cabeceras.</p>
+                </div>
+                <!-- Panel Imagen -->
+                <div id="import-panel-imagen" class="hidden">
+                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube una foto de planilla en papel</label>
+                    <input type="file" id="import-imagen" accept="image/*" capture="environment" class="w-full text-sm border rounded-lg p-3 file:mr-3 file:text-xs file:bg-[#b08b82] file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:font-semibold">
+                    <p class="text-xs text-stone-400 mt-2">Funciona con fotos de planillas, escaneos o capturas de pantalla. Puedes subir varias evaluaciones en una sola imagen.</p>
+                </div>
+                <button id="btn-import-analizar" class="w-full bg-[#4a3e3d] text-white text-sm font-semibold py-3 rounded-lg hover:bg-[#5c4e4d] transition uppercase tracking-wider">
+                    Analizar con IA
+                </button>
+                <p id="import-status" class="text-xs text-red-500 text-center"></p>
+                <!-- Preview -->
+                <div id="import-preview" class="hidden">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">Datos detectados — asigna cada evaluación a una alumna:</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead class="bg-stone-50">
+                                <tr class="text-left text-stone-500 uppercase text-xs">
+                                    <th class="py-2 px-3">Nombre detectado</th>
+                                    <th class="py-2 px-3">Fecha</th>
+                                    <th class="py-2 px-3">Peso</th>
+                                    <th class="py-2 px-3">Pliegues</th>
+                                    <th class="py-2 px-3">Alumna en sistema</th>
+                                </tr>
+                            </thead>
+                            <tbody id="import-preview-tbody"></tbody>
+                        </table>
+                    </div>
+                    <button id="btn-import-confirmar" class="mt-4 w-full bg-green-700 text-white text-sm font-semibold py-3 rounded-lg hover:bg-green-800 transition uppercase tracking-wider">
+                        Confirmar y Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SheetJS para Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 </html>
