@@ -36,6 +36,38 @@
         @keyframes toast-in  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         @keyframes toast-out { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(12px); } }
 
+        /* ── INFORME PDF (print) ── */
+        @media print {
+            body > *:not(#print-informe) { display: none !important; }
+            #print-informe { display: block !important; }
+            @page { margin: 18mm 16mm; size: A4; }
+        }
+        #print-informe { display: none; }
+        #print-informe { font-family: 'Plus Jakarta Sans', sans-serif; color: #1c1917; }
+        #print-informe .pi-header { display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 2px solid #b08b82; padding-bottom: 10px; margin-bottom: 18px; }
+        #print-informe .pi-logo { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:600; color:#4a3e3d; }
+        #print-informe .pi-meta { font-size:10px; color:#78716c; text-align:right; line-height:1.6; }
+        #print-informe .pi-alumno { background:#fdf6f0; border:1px solid #e8d5c4; border-radius:10px; padding:14px 18px; margin-bottom:18px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+        #print-informe .pi-field label { font-size:9px; text-transform:uppercase; letter-spacing:.06em; color:#a8927f; font-weight:600; display:block; margin-bottom:2px; }
+        #print-informe .pi-field span  { font-size:13px; font-weight:600; color:#1c1917; }
+        #print-informe .pi-section-title { font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:600; color:#4a3e3d; border-bottom:1px solid #e7e0dc; padding-bottom:4px; margin:16px 0 10px; }
+        #print-informe table { width:100%; border-collapse:collapse; font-size:9.5px; }
+        #print-informe th { background:#4a3e3d; color:#fff; padding:6px 8px; text-align:left; font-weight:600; font-size:8.5px; text-transform:uppercase; letter-spacing:.04em; }
+        #print-informe td { padding:5px 8px; border-bottom:1px solid #f0ebe6; vertical-align:top; }
+        #print-informe tr:nth-child(even) td { background:#fdf8f6; }
+        #print-informe .pi-delta-pos { color:#dc2626; font-size:8.5px; }
+        #print-informe .pi-delta-neg { color:#16a34a; font-size:8.5px; }
+        #print-informe .pi-ev-card { border:1px solid #e7e0dc; border-radius:8px; padding:12px 14px; margin-bottom:10px; page-break-inside:avoid; }
+        #print-informe .pi-ev-date { font-family:'Cormorant Garamond',serif; font-size:14px; font-weight:600; color:#4a3e3d; margin-bottom:8px; border-bottom:1px solid #f0ebe6; padding-bottom:4px; }
+        #print-informe .pi-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        #print-informe .pi-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+        #print-informe .pi-metric { background:#fdf8f6; border-radius:6px; padding:6px 10px; }
+        #print-informe .pi-metric-lbl { font-size:8px; text-transform:uppercase; letter-spacing:.05em; color:#a8927f; font-weight:600; }
+        #print-informe .pi-metric-val { font-size:13px; font-weight:700; color:#1c1917; }
+        #print-informe .pi-chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+        #print-informe .pi-chip  { font-size:8.5px; background:#f5ede7; border:1px solid #e8d5c4; border-radius:4px; padding:2px 7px; }
+        #print-informe .pi-footer { margin-top:24px; border-top:1px solid #e7e0dc; padding-top:8px; font-size:8.5px; color:#a8927f; display:flex; justify-content:space-between; }
+
         /* ── MODAL CONFIRMACIÓN ── */
         #modal-confirmar-overlay {
             position: fixed; inset: 0;
@@ -283,7 +315,13 @@
 
                     <!-- HISTORIAL -->
                     <div id="seccion-historial" class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hidden">
-                        <h3 class="text-xl font-serif text-[#4a3e3d] border-b pb-2 mb-4 font-semibold">Historial y Evolución</h3>
+                        <div class="flex justify-between items-center border-b pb-2 mb-4 flex-wrap gap-2">
+                            <h3 class="text-xl font-serif text-[#4a3e3d] font-semibold">Historial y Evolución</h3>
+                            <div class="flex gap-2">
+                                <button onclick="exportarExcel()" class="text-xs px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition font-semibold">📊 Exportar XLS</button>
+                                <button onclick="generarInformePDF()" class="text-xs px-3 py-1.5 bg-[#f5eae4] text-[#4a3e3d] border border-[#c2a69f] rounded-lg hover:bg-[#ecddd5] transition font-semibold">📄 Informe PDF</button>
+                            </div>
+                        </div>
                         <div id="tabla-historial" class="space-y-4"></div>
                     </div>
 
@@ -295,6 +333,9 @@
     <footer class="text-center py-8 text-xs text-stone-400 mt-12 border-t border-stone-100 w-full">
         <p>&copy; 2026 PattyTrainer. Todos los derechos reservados.</p>
     </footer>
+
+    <!-- CONTENEDOR INFORME PDF (solo visible al imprimir) -->
+    <div id="print-informe"></div>
 
     <!-- MODAL EDITAR EVALUACIÓN -->
     <div id="modal-editar-ev" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1561,6 +1602,188 @@
                 document.getElementById('import-status').textContent = '⚠ Error: ' + error.message;
             }
         });
+
+        // ── EXPORTAR EXCEL ──
+        function exportarExcel() {
+            if (!alumnoSeleccionado) return mostrarToast('Selecciona un alumno primero.', 'info');
+            supabaseClient.from('pt_evaluaciones').select('*').eq('alumno_id', alumnoSeleccionado.id).order('fecha').then(({ data: evs }) => {
+                if (!evs || evs.length === 0) return mostrarToast('Sin evaluaciones para exportar.', 'info');
+                const nacimiento = alumnoSeleccionado?.nacimiento;
+                const rows = evs.map(ev => {
+                    const extra = ev.extra_data || {};
+                    const edadEv = nacimiento ? calcularEdad(nacimiento, ev.fecha) : (ev.edad || '');
+                    const suprailiac = (ev.supraespinal > 0) ? ev.supraespinal : (parseFloat(extra.cresta_iliaca) || 0);
+                    const b = parseFloat(extra.biceps) || 0, t = parseFloat(ev.triceps) || 0, se = parseFloat(ev.subescapular) || 0;
+                    const suma4 = (b > 0 && t > 0 && se > 0 && suprailiac > 0) ? +(b + t + se + suprailiac).toFixed(1) : '';
+                    const calc = realizarCalculosAntropometricos({
+                        peso: ev.peso, talla: ev.talla, edad: edadEv, sexo: ev.sexo,
+                        biceps: b, triceps: t, subescapular: se, cresta_iliaca: parseFloat(extra.cresta_iliaca) || 0,
+                        supraespinal: parseFloat(ev.supraespinal) || 0, abdominal: parseFloat(ev.abdominal) || 0,
+                        muslo: parseFloat(ev.muslo) || 0, pantorrilla: parseFloat(ev.pantorrilla) || 0,
+                    });
+                    return {
+                        'Fecha': ev.fecha,
+                        'Edad (años)': edadEv,
+                        'Sexo': ev.sexo || '',
+                        'Peso (kg)': ev.peso || '',
+                        'Talla (cm)': ev.talla || '',
+                        'IMC': ev.talla ? calc.imc : '',
+                        '% Grasa Durnin-Womersley': calc.grasaDW !== 'N/A' ? calc.grasaDW : '',
+                        '% Grasa Yuhasz': calc.grasaYuhasz !== 'N/A' ? calc.grasaYuhasz : '',
+                        '% Grasa Registrado': ev.pct_grasa || '',
+                        'Suma 6 Pliegues (mm)': calc.suma6 > 0 ? calc.suma6 : '',
+                        'Suma 4 Pliegues Durnin (mm)': suma4,
+                        'Pliegue Tríceps (mm)': ev.triceps || '',
+                        'Pliegue Subescapular (mm)': ev.subescapular || '',
+                        'Pliegue Bíceps (mm)': extra.biceps || '',
+                        'Pliegue Cresta Ilíaca (mm)': extra.cresta_iliaca || '',
+                        'Pliegue Supraespinal (mm)': ev.supraespinal || '',
+                        'Pliegue Abdominal (mm)': ev.abdominal || '',
+                        'Pliegue Muslo (mm)': ev.muslo || '',
+                        'Pliegue Pantorrilla (mm)': ev.pantorrilla || '',
+                        'Perímetro Cintura (cm)': extra.p_cintura || '',
+                        'Perímetro Cadera (cm)': extra.p_cadera || '',
+                        'Perímetro Brazo Relajado (cm)': extra.p_brazo_rel || '',
+                        'Perímetro Brazo Flexionado (cm)': extra.p_brazo_flex || '',
+                        'Perímetro Pantorrilla (cm)': extra.p_pantorrilla || '',
+                        'Notas': extra.notas || '',
+                    };
+                });
+                const ws = XLSX.utils.json_to_sheet(rows);
+                // Ancho de columnas
+                ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.max(k.length, 12) }));
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Evaluaciones');
+                const nombre = alumnoSeleccionado.nombre.replace(/\s+/g, '_');
+                XLSX.writeFile(wb, `Evaluaciones_${nombre}_${new Date().toISOString().split('T')[0]}.xlsx`);
+                mostrarToast('Excel exportado ✓', 'success');
+            });
+        }
+
+        // ── INFORME PDF ──
+        function generarInformePDF() {
+            if (!alumnoSeleccionado) return mostrarToast('Selecciona un alumno primero.', 'info');
+            supabaseClient.from('pt_evaluaciones').select('*').eq('alumno_id', alumnoSeleccionado.id).order('fecha').then(({ data: evs }) => {
+                if (!evs || evs.length === 0) return mostrarToast('Sin evaluaciones para generar informe.', 'info');
+                const al = alumnoSeleccionado;
+                const nacimiento = al.nacimiento;
+                const hoy = new Date().toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' });
+
+                // Calcular métricas por evaluación
+                const evsConCalc = evs.map(ev => {
+                    const extra = ev.extra_data || {};
+                    const edadEv = nacimiento ? calcularEdad(nacimiento, ev.fecha) : (ev.edad || null);
+                    const calc = realizarCalculosAntropometricos({
+                        peso: ev.peso, talla: ev.talla, edad: edadEv, sexo: ev.sexo,
+                        biceps: parseFloat(extra.biceps)||0, triceps: parseFloat(ev.triceps)||0,
+                        subescapular: parseFloat(ev.subescapular)||0, cresta_iliaca: parseFloat(extra.cresta_iliaca)||0,
+                        supraespinal: parseFloat(ev.supraespinal)||0, abdominal: parseFloat(ev.abdominal)||0,
+                        muslo: parseFloat(ev.muslo)||0, pantorrilla: parseFloat(ev.pantorrilla)||0,
+                    });
+                    const suprailiac = (parseFloat(ev.supraespinal)||0) > 0 ? parseFloat(ev.supraespinal) : (parseFloat(extra.cresta_iliaca)||0);
+                    const b=parseFloat(extra.biceps)||0, t=parseFloat(ev.triceps)||0, s=parseFloat(ev.subescapular)||0;
+                    const suma4 = (b>0&&t>0&&s>0&&suprailiac>0) ? +(b+t+s+suprailiac).toFixed(1) : null;
+                    const grasaFinal = calc.grasaDW !== 'N/A' ? calc.grasaDW + '%' : (ev.pct_grasa ? ev.pct_grasa + '%' : '—');
+                    const edadMostrar = nacimiento ? calcularEdad(nacimiento, ev.fecha) : (ev.edad || '—');
+                    return { ev, extra, calc, suma4, grasaFinal, edadMostrar };
+                });
+
+                // Tabla resumen de evolución
+                const primera = evsConCalc[0], ultima = evsConCalc[evsConCalc.length - 1];
+                const difPeso = evs.length > 1 ? +(ultima.ev.peso - primera.ev.peso).toFixed(1) : null;
+                const difGrasa = (ultima.calc.grasaDW !== 'N/A' && primera.calc.grasaDW !== 'N/A' && evs.length > 1)
+                    ? +(parseFloat(ultima.calc.grasaDW) - parseFloat(primera.calc.grasaDW)).toFixed(1) : null;
+
+                const deltaClass = (v) => v === null ? '' : v < 0 ? 'pi-delta-neg' : v > 0 ? 'pi-delta-pos' : '';
+                const deltaStr   = (v, u) => v === null ? '' : `<span class="${deltaClass(v)}">${v > 0 ? '+' : ''}${v}${u}</span>`;
+
+                // Generar tarjetas de evaluación
+                const cardsHTML = [...evsConCalc].reverse().map(({ ev, extra, calc, suma4, grasaFinal, edadMostrar }) => {
+                    const fechaFmt = parseFecha(ev.fecha).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' });
+                    const pliegues = [];
+                    if (ev.triceps)          pliegues.push(`Tríceps: ${ev.triceps} mm`);
+                    if (ev.subescapular)     pliegues.push(`Subescapular: ${ev.subescapular} mm`);
+                    if (extra.biceps)        pliegues.push(`Bíceps: ${extra.biceps} mm`);
+                    if (extra.cresta_iliaca) pliegues.push(`Cresta Ilíaca: ${extra.cresta_iliaca} mm`);
+                    if (ev.supraespinal)     pliegues.push(`Supraespinal: ${ev.supraespinal} mm`);
+                    if (ev.abdominal)        pliegues.push(`Abdominal: ${ev.abdominal} mm`);
+                    if (ev.muslo)            pliegues.push(`Muslo: ${ev.muslo} mm`);
+                    if (ev.pantorrilla)      pliegues.push(`Pantorrilla: ${ev.pantorrilla} mm`);
+                    const perimetros = [];
+                    if (extra.p_cintura)     perimetros.push(`Cintura: ${extra.p_cintura} cm`);
+                    if (extra.p_cadera)      perimetros.push(`Cadera: ${extra.p_cadera} cm`);
+                    if (extra.p_brazo_rel)   perimetros.push(`Brazo Rel.: ${extra.p_brazo_rel} cm`);
+                    if (extra.p_brazo_flex)  perimetros.push(`Brazo Flex.: ${extra.p_brazo_flex} cm`);
+                    if (extra.p_pantorrilla) perimetros.push(`Pantorrilla: ${extra.p_pantorrilla} cm`);
+
+                    return `<div class="pi-ev-card">
+                        <div class="pi-ev-date">${fechaFmt} &nbsp;·&nbsp; ${edadMostrar} años &nbsp;·&nbsp; ${ev.sexo || '—'}</div>
+                        <div class="pi-grid3" style="margin-bottom:8px;">
+                            <div class="pi-metric"><div class="pi-metric-lbl">Peso</div><div class="pi-metric-val">${ev.peso ? ev.peso + ' kg' : '—'}</div></div>
+                            <div class="pi-metric"><div class="pi-metric-lbl">Talla</div><div class="pi-metric-val">${ev.talla ? ev.talla + ' cm' : '—'}</div></div>
+                            <div class="pi-metric"><div class="pi-metric-lbl">IMC</div><div class="pi-metric-val">${ev.talla ? calc.imc : '—'}</div></div>
+                            <div class="pi-metric"><div class="pi-metric-lbl">% Grasa</div><div class="pi-metric-val">${grasaFinal}</div></div>
+                            <div class="pi-metric"><div class="pi-metric-lbl">${suma4 ? 'Suma 4 Pliegues' : 'Suma 6 Pliegues'}</div><div class="pi-metric-val">${suma4 ? suma4 + ' mm' : (calc.suma6 > 0 ? calc.suma6 + ' mm' : '—')}</div></div>
+                            <div class="pi-metric"><div class="pi-metric-lbl">Grasa Yuhasz</div><div class="pi-metric-val">${calc.grasaYuhasz !== 'N/A' ? calc.grasaYuhasz + '%' : '—'}</div></div>
+                        </div>
+                        ${pliegues.length ? `<div style="margin-bottom:6px;"><span style="font-size:8px;text-transform:uppercase;letter-spacing:.05em;color:#a8927f;font-weight:600;">Pliegues &nbsp;</span><div class="pi-chips">${pliegues.map(p=>`<span class="pi-chip">${p}</span>`).join('')}</div></div>` : ''}
+                        ${perimetros.length ? `<div><span style="font-size:8px;text-transform:uppercase;letter-spacing:.05em;color:#a8927f;font-weight:600;">Perímetros &nbsp;</span><div class="pi-chips">${perimetros.map(p=>`<span class="pi-chip">${p}</span>`).join('')}</div></div>` : ''}
+                        ${extra.notas ? `<div style="margin-top:6px;font-size:8.5px;color:#78716c;font-style:italic;">Notas: ${extra.notas}</div>` : ''}
+                    </div>`;
+                }).join('');
+
+                // Tabla resumen
+                const resumenRows = evsConCalc.map(({ ev, calc, suma4, grasaFinal, edadMostrar }, i) => {
+                    const prev = i > 0 ? evsConCalc[i-1] : null;
+                    const dp = prev ? +(ev.ev.peso - prev.ev.peso).toFixed(1) : null;
+                    return `<tr>
+                        <td>${parseFecha(ev.fecha).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}</td>
+                        <td>${edadMostrar}</td>
+                        <td><b>${ev.peso ? ev.peso + ' kg' : '—'}</b>${dp !== null ? ' ' + deltaStr(dp,' kg') : ''}</td>
+                        <td>${ev.talla ? ev.talla + ' cm' : '—'}</td>
+                        <td>${ev.talla ? calc.imc : '—'}</td>
+                        <td>${grasaFinal}</td>
+                        <td>${suma4 ? suma4 + ' mm' : (calc.suma6 > 0 ? calc.suma6 + ' mm' : '—')}</td>
+                    </tr>`;
+                }).join('');
+
+                document.getElementById('print-informe').innerHTML = `
+                    <div class="pi-header">
+                        <div>
+                            <div class="pi-logo">PattyTrainer</div>
+                            <div style="font-size:11px;color:#78716c;margin-top:2px;">Informe Antropométrico Profesional</div>
+                        </div>
+                        <div class="pi-meta">Generado el ${hoy}<br>Entrenadora: Patricia Trainer</div>
+                    </div>
+
+                    <div class="pi-alumno">
+                        <div class="pi-field"><label>Nombre</label><span>${al.nombre}</span></div>
+                        <div class="pi-field"><label>Fecha de Nacimiento</label><span>${nacimiento ? parseFecha(nacimiento).toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'}) : '—'}</span></div>
+                        <div class="pi-field"><label>Evaluaciones registradas</label><span>${evs.length}</span></div>
+                        ${evs.length > 1 ? `
+                        <div class="pi-field"><label>Período</label><span>${parseFecha(evs[0].fecha).toLocaleDateString('es-ES',{month:'short',year:'numeric'})} – ${parseFecha(evs[evs.length-1].fecha).toLocaleDateString('es-ES',{month:'short',year:'numeric'})}</span></div>
+                        <div class="pi-field"><label>Variación Peso</label><span>${difPeso !== null ? (difPeso > 0 ? '+' : '') + difPeso + ' kg' : '—'}</span></div>
+                        <div class="pi-field"><label>Variación % Grasa</label><span>${difGrasa !== null ? (difGrasa > 0 ? '+' : '') + difGrasa + '%' : '—'}</span></div>` : ''}
+                    </div>
+
+                    <div class="pi-section-title">Resumen de Evolución</div>
+                    <table>
+                        <thead><tr><th>Fecha</th><th>Edad</th><th>Peso</th><th>Talla</th><th>IMC</th><th>% Grasa</th><th>Suma Pliegues</th></tr></thead>
+                        <tbody>${resumenRows}</tbody>
+                    </table>
+
+                    <div class="pi-section-title">Detalle por Evaluación</div>
+                    ${cardsHTML}
+
+                    <div class="pi-footer">
+                        <span>PattyTrainer · Informe confidencial · ${al.nombre}</span>
+                        <span>Generado el ${hoy}</span>
+                    </div>
+                `;
+
+                window.print();
+            });
+        }
 
     </script>
 
