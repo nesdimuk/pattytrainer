@@ -293,8 +293,8 @@
 
     <script>
         // ── SUPABASE ──
-        const SUPABASE_URL = "https://oovethvkpqabxayosdwq.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vdmV0aHZrcHFhYnhheW9zZHdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMjczMzksImV4cCI6MjA5OTcwMzMzOX0.MJfwnXSfnGyv2pMUuFWTyLN9lwmrswBWF-qb6TrspWY";
+        const SUPABASE_URL = "https://supabase.saidcoach.com";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNjQxNzY5MjAwLCJleHAiOjE3OTk1MzU2MDB9.zfTwsA1JbNTMIX8u3NdGQIVqSl1XbwZPJKEb9bxK0RM";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const CORREO_ENTRENADORA = "patty@trainer.com";
 
@@ -426,12 +426,12 @@
             setLoading('btn-submit-alumna', true, id ? 'Guardar Cambios' : '+ Registrar Alumna', 'Guardando...');
 
             if (id) {
-                const { error } = await supabaseClient.from('alumnos').update({ nombre, email, nacimiento }).eq('id', id);
+                const { error } = await supabaseClient.from('pt_alumnos').update({ nombre, email, nacimiento }).eq('id', id);
                 setLoading('btn-submit-alumna', false, '+ Registrar Alumna', 'Guardando...');
                 if (!error) { resetearFormularioAlumna(); cargarAlumnos(); mostrarToast('Alumna actualizada con éxito.'); }
                 else mostrarToast('Error al actualizar: ' + error.message, 'error');
             } else {
-                const { error } = await supabaseClient.from('alumnos').insert([{ nombre, email, entrenadora_id: usuarioActual.id, nacimiento }]);
+                const { error } = await supabaseClient.from('pt_alumnos').insert([{ nombre, email, entrenadora_id: usuarioActual.id, nacimiento }]);
                 setLoading('btn-submit-alumna', false, '+ Registrar Alumna', 'Guardando...');
                 if (!error) { document.getElementById('registroAlumnaForm').reset(); cargarAlumnos(); mostrarToast('Alumna registrada.'); }
                 else mostrarToast('Error al registrar: ' + error.message, 'error');
@@ -451,7 +451,7 @@
         }
 
         async function cargarAlumnos() {
-            const { data: alumnos } = await supabaseClient.from('alumnos').select('*').order('nombre', { ascending: true });
+            const { data: alumnos } = await supabaseClient.from('pt_alumnos').select('*').order('nombre', { ascending: true });
             const container = document.getElementById('lista-alumnos');
             container.innerHTML = '';
             if (alumnos && alumnos.length > 0) {
@@ -493,7 +493,7 @@
                 `¿Eliminar a "${al.nombre}"? Se perderán para siempre todas sus evaluaciones.`,
                 'Eliminar',
                 async () => {
-                    const { error } = await supabaseClient.from('alumnos').delete().eq('id', al.id);
+                    const { error } = await supabaseClient.from('pt_alumnos').delete().eq('id', al.id);
                     if (!error) {
                         if (alumnoSeleccionado?.id === al.id) {
                             ['seccion-evaluacion','seccion-grafico','seccion-historial'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -657,7 +657,7 @@
 
         // ── HISTORIAL ──
         async function cargarHistorialEvaluaciones() {
-            const { data: evs } = await supabaseClient.from('evaluaciones').select('*').eq('alumno_id', alumnoSeleccionado.id).order('fecha', { ascending: true });
+            const { data: evs } = await supabaseClient.from('pt_evaluaciones').select('*').eq('alumno_id', alumnoSeleccionado.id).order('fecha', { ascending: true });
             const container = document.getElementById('tabla-historial');
             container.innerHTML = '';
 
@@ -813,7 +813,7 @@
                 '¿Eliminar este registro de evaluación? Esta acción no se puede deshacer.',
                 'Eliminar Registro',
                 async () => {
-                    const { error } = await supabaseClient.from('evaluaciones').delete().eq('id', evId);
+                    const { error } = await supabaseClient.from('pt_evaluaciones').delete().eq('id', evId);
                     if (!error) { cargarHistorialEvaluaciones(); mostrarToast('Registro eliminado.', 'info'); }
                     else mostrarToast('Error al borrar: ' + error.message, 'error');
                 }
@@ -918,7 +918,7 @@
                           extra_data: { biceps: 6.0, cresta_iliaca: 11.0, p_brazo_rel: 27.0, p_brazo_flex: 28.5, p_cintura: 70.2, p_cadera: 96.5, p_pantorrilla: 35.0, d_humero: 6.2, d_femur: 9.4, d_biestiloideo: 5.1 } }
                     ];
 
-                    const { error } = await supabaseClient.from('evaluaciones').insert(evaluacionesDePrueba);
+                    const { error } = await supabaseClient.from('pt_evaluaciones').insert(evaluacionesDePrueba);
                     if (!error) { mostrarToast('3 evaluaciones de prueba inyectadas.'); cargarHistorialEvaluaciones(); }
                     else mostrarToast('Error al inyectar: ' + error.message, 'error');
                 }
@@ -944,7 +944,7 @@
                 notas: document.getElementById('notas_eval').value.trim(),
             };
 
-            const { error } = await supabaseClient.from('evaluaciones').insert([{
+            const { error } = await supabaseClient.from('pt_evaluaciones').insert([{
                 alumno_id: alumnoSeleccionado.id,
                 fecha:        document.getElementById('fecha_eval').value,
                 edad:         raw.edad,
