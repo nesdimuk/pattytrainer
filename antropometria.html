@@ -447,12 +447,12 @@
             return new Date(y, m - 1, d);
         }
 
-        function calcularEdad(fechaNac) {
+        function calcularEdad(fechaNac, enFecha) {
             const nac = parseFecha(fechaNac);
-            const hoy = new Date();
-            let edad = hoy.getFullYear() - nac.getFullYear();
-            const m = hoy.getMonth() - nac.getMonth();
-            if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+            const ref = enFecha ? parseFecha(enFecha) : new Date();
+            let edad = ref.getFullYear() - nac.getFullYear();
+            const m = ref.getMonth() - nac.getMonth();
+            if (m < 0 || (m === 0 && ref.getDate() < nac.getDate())) edad--;
             return edad;
         }
 
@@ -804,8 +804,11 @@
                 // Pre-calcular todos para poder sacar deltas
                 const calcsPorEv = evs.map(ev => {
                     const extra = ev.extra_data || {};
+                    // Calcular edad al momento de la evaluación desde nacimiento del alumno
+                    const nacimiento = alumnoSeleccionado?.nacimiento;
+                    const edadEv = nacimiento ? calcularEdad(nacimiento, ev.fecha) : (ev.edad || null);
                     return realizarCalculosAntropometricos({
-                        peso: ev.peso, talla: ev.talla, edad: ev.edad, sexo: ev.sexo,
+                        peso: ev.peso, talla: ev.talla, edad: edadEv, sexo: ev.sexo || alumnoSeleccionado?.sexo,
                         biceps:        parseFloat(extra.biceps)         || 0,
                         triceps:       parseFloat(ev.triceps)           || 0,
                         subescapular:  parseFloat(ev.subescapular)      || 0,
@@ -848,6 +851,8 @@
                     const imcCat   = clasificarIMC(calc.imc);
                     const extra    = ev.extra_data || {};
                     const notas    = extra.notas || '';
+                    const nacimiento = alumnoSeleccionado?.nacimiento;
+                    const edadMostrar = nacimiento ? calcularEdad(nacimiento, ev.fecha) : ev.edad;
 
                     // Suma 4 pliegues Durnin: bíceps+tríceps+subescapular+cresta_iliaca
                     const b4 = parseFloat(extra.biceps) || 0;
@@ -899,7 +904,7 @@
                                 <button onclick="confirmarEliminarEvaluacion('${ev.id}')" class="text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition">
                                     Borrar Reg.
                                 </button>
-                                ${ev.edad ? `<span class="text-xs bg-stone-200/60 px-2 py-0.5 rounded-full font-semibold">Edad: ${ev.edad} años</span>` : `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold" title="La edad es necesaria para calcular % grasa (Durnin)">⚠️ Sin edad — <button onclick="abrirEditarEvaluacion('${ev.id}')" class="underline">agregar</button></span>`}
+                                ${edadMostrar ? `<span class="text-xs bg-stone-200/60 px-2 py-0.5 rounded-full font-semibold">Edad: ${edadMostrar} años</span>` : `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold" title="Ingresa fecha de nacimiento en el perfil del alumno">⚠️ Sin nacimiento</span>`}
                             </div>
                         </div>
 
