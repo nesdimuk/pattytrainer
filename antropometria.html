@@ -995,7 +995,7 @@
         });
 
         function resetImportModal() {
-            document.getElementById('import-tab-texto').click();
+            switchImportTab('texto');
             document.getElementById('import-texto').value = '';
             document.getElementById('import-archivo').value = '';
             document.getElementById('import-imagen').value = '';
@@ -1007,17 +1007,29 @@
 
         // Tabs
         const IMPORT_TABS = ['texto','excel','imagen','pdf'];
-        IMPORT_TABS.forEach(tab => {
-            document.getElementById(`import-tab-${tab}`).addEventListener('click', () => {
-                IMPORT_TABS.forEach(t => {
-                    document.getElementById(`import-tab-${t}`).classList.toggle('bg-[#4a3e3d]', t === tab);
-                    document.getElementById(`import-tab-${t}`).classList.toggle('text-white', t === tab);
-                    document.getElementById(`import-tab-${t}`).classList.toggle('bg-stone-100', t !== tab);
-                    document.getElementById(`import-tab-${t}`).classList.toggle('text-stone-600', t !== tab);
-                    document.getElementById(`import-panel-${t}`).classList.toggle('hidden', t !== tab);
-                });
+        let importActiveTab = 'texto';
+
+        function switchImportTab(tab) {
+            importActiveTab = tab;
+            IMPORT_TABS.forEach(t => {
+                const btn = document.getElementById(`import-tab-${t}`);
+                const panel = document.getElementById(`import-panel-${t}`);
+                if (t === tab) {
+                    btn.style.background = '#4a3e3d';
+                    btn.style.color = '#fff';
+                    panel.classList.remove('hidden');
+                } else {
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    panel.classList.add('hidden');
+                }
             });
+        }
+
+        IMPORT_TABS.forEach(tab => {
+            document.getElementById(`import-tab-${tab}`).addEventListener('click', () => switchImportTab(tab));
         });
+        switchImportTab('texto');
 
         // Analizar
         document.getElementById('btn-import-analizar').addEventListener('click', async () => {
@@ -1028,7 +1040,7 @@
             importarPendientes = [];
 
             try {
-                const activeTab = document.querySelector('[id^="import-tab-"].bg-\\[\\#4a3e3d\\]')?.id?.replace('import-tab-','') || 'texto';
+                const activeTab = importActiveTab;
 
                 let payloads = [];
 
