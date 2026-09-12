@@ -167,8 +167,29 @@
                     <form id="registroAlumnaForm" class="mb-6 space-y-3">
                         <input type="hidden" id="alumna-edit-id" value="">
                         <input type="text" id="nuevo-nombre" placeholder="Nombre completo" required class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                        <input type="date" id="nuevo-nacimiento" required class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
-                        <input type="email" id="nuevo-email" placeholder="Email (opcional)" class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-xs text-stone-400 block mb-0.5">Fecha de nacimiento</label>
+                                <input type="date" id="nuevo-nacimiento" required class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                            </div>
+                            <div>
+                                <label class="text-xs text-stone-400 block mb-0.5">Sexo biológico</label>
+                                <select id="nuevo-sexo" class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                                    <option value="femenino">Femenino</option>
+                                    <option value="masculino">Masculino</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-xs text-stone-400 block mb-0.5">Talla de referencia (cm)</label>
+                                <input type="number" step="0.1" id="nuevo-talla-ref" placeholder="ej. 170" class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                            </div>
+                            <div>
+                                <label class="text-xs text-stone-400 block mb-0.5">Email (opcional)</label>
+                                <input type="email" id="nuevo-email" placeholder="email@..." class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#c2a69f]">
+                            </div>
+                        </div>
                         <div class="flex gap-2">
                             <button type="submit" id="btn-submit-alumna" class="flex-grow bg-[#b08b82] text-white text-xs font-semibold py-2.5 rounded-lg hover:bg-[#c2a69f] transition uppercase tracking-wider">
                                 + Registrar Alumna
@@ -594,20 +615,22 @@
         // ── ALUMNAS ──
         document.getElementById('registroAlumnaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id        = document.getElementById('alumna-edit-id').value;
-            const nombre    = document.getElementById('nuevo-nombre').value;
-            const email     = document.getElementById('nuevo-email').value;
+            const id         = document.getElementById('alumna-edit-id').value;
+            const nombre     = document.getElementById('nuevo-nombre').value;
+            const email      = document.getElementById('nuevo-email').value;
             const nacimiento = document.getElementById('nuevo-nacimiento').value;
+            const sexo       = document.getElementById('nuevo-sexo').value;
+            const talla_ref  = parseFloat(document.getElementById('nuevo-talla-ref').value) || null;
 
             setLoading('btn-submit-alumna', true, id ? 'Guardar Cambios' : '+ Registrar Alumna', 'Guardando...');
 
             if (id) {
-                const { error } = await supabaseClient.from('pt_alumnos').update({ nombre, email, nacimiento }).eq('id', id);
+                const { error } = await supabaseClient.from('pt_alumnos').update({ nombre, email, nacimiento, sexo, talla_ref }).eq('id', id);
                 setLoading('btn-submit-alumna', false, '+ Registrar Alumna', 'Guardando...');
                 if (!error) { resetearFormularioAlumna(); cargarAlumnos(); mostrarToast('Alumna actualizada con éxito.'); }
                 else mostrarToast('Error al actualizar: ' + error.message, 'error');
             } else {
-                const { error } = await supabaseClient.from('pt_alumnos').insert([{ nombre, email, entrenadora_id: usuarioActual.id, nacimiento }]);
+                const { error } = await supabaseClient.from('pt_alumnos').insert([{ nombre, email, entrenadora_id: usuarioActual.id, nacimiento, sexo, talla_ref }]);
                 setLoading('btn-submit-alumna', false, '+ Registrar Alumna', 'Guardando...');
                 if (!error) { document.getElementById('registroAlumnaForm').reset(); cargarAlumnos(); mostrarToast('Alumna registrada.'); }
                 else mostrarToast('Error al registrar: ' + error.message, 'error');
@@ -621,6 +644,8 @@
             document.getElementById('nuevo-nombre').value = '';
             document.getElementById('nuevo-email').value = '';
             document.getElementById('nuevo-nacimiento').value = '';
+            document.getElementById('nuevo-sexo').value = 'femenino';
+            document.getElementById('nuevo-talla-ref').value = '';
             document.getElementById('titulo-gestion-alumna').textContent = 'Mis Alumnas';
             document.getElementById('btn-submit-alumna').textContent = '+ Registrar Alumna';
             document.getElementById('btn-cancelar-edicion').classList.add('hidden');
@@ -635,10 +660,11 @@
                     const row = document.createElement('div');
                     row.className = 'flex items-center justify-between p-3 rounded-xl border border-stone-100 bg-white hover:bg-stone-50/50 transition group';
                     const edad = al.nacimiento ? calcularEdad(al.nacimiento) + ' años' : 'Sin nacimiento';
+                    const sexoLabel = al.sexo === 'masculino' ? '♂' : '♀';
                     row.innerHTML = `
                         <button class="text-left flex-grow focus:outline-none flex flex-col gap-0.5">
-                            <span class="font-semibold text-stone-800 text-sm">${al.nombre}</span>
-                            <span class="text-xs text-stone-400">${edad} | ${al.email || 'Sin email'}</span>
+                            <span class="font-semibold text-stone-800 text-sm">${al.nombre} <span class="text-stone-400 font-normal">${sexoLabel}</span></span>
+                            <span class="text-xs text-stone-400">${edad}${al.talla_ref ? ' · ' + al.talla_ref + ' cm' : ''} | ${al.email || 'Sin email'}</span>
                         </button>
                         <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button title="Editar" class="btn-editar p-1.5 hover:bg-stone-100 rounded text-stone-600 transition">✏️</button>
@@ -659,7 +685,9 @@
             document.getElementById('nuevo-nombre').value = al.nombre;
             document.getElementById('nuevo-email').value = al.email || '';
             document.getElementById('nuevo-nacimiento').value = al.nacimiento || '';
-            document.getElementById('titulo-gestion-alumna').textContent = 'Editar Alumna';
+            document.getElementById('nuevo-sexo').value = al.sexo || 'femenino';
+            document.getElementById('nuevo-talla-ref').value = al.talla_ref || '';
+            document.getElementById('titulo-gestion-alumna').textContent = 'Editar Alumno/a';
             document.getElementById('btn-submit-alumna').textContent = 'Guardar Cambios';
             document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
         }
@@ -848,8 +876,10 @@
                     // Calcular edad al momento de la evaluación desde nacimiento del alumno
                     const nacimiento = alumnoSeleccionado?.nacimiento;
                     const edadEv = nacimiento ? calcularEdad(nacimiento, ev.fecha) : (ev.edad || null);
+                    const sexoEv  = ev.sexo  || alumnoSeleccionado?.sexo  || 'femenino';
+                    const tallaEv = ev.talla || alumnoSeleccionado?.talla_ref || null;
                     return realizarCalculosAntropometricos({
-                        peso: ev.peso, talla: ev.talla, edad: edadEv, sexo: ev.sexo || alumnoSeleccionado?.sexo,
+                        peso: ev.peso, talla: tallaEv, edad: edadEv, sexo: sexoEv,
                         biceps:        parseFloat(extra.biceps)         || 0,
                         triceps:       parseFloat(ev.triceps)           || 0,
                         subescapular:  parseFloat(ev.subescapular)      || 0,
@@ -892,8 +922,10 @@
                     const imcCat   = clasificarIMC(calc.imc);
                     const extra    = ev.extra_data || {};
                     const notas    = extra.notas || '';
-                    const nacimiento = alumnoSeleccionado?.nacimiento;
+                    const nacimiento  = alumnoSeleccionado?.nacimiento;
                     const edadMostrar = nacimiento ? calcularEdad(nacimiento, ev.fecha) : ev.edad;
+                    const tallaMostrar = ev.talla || alumnoSeleccionado?.talla_ref || null;
+                    const sexoMostrar  = ev.sexo  || alumnoSeleccionado?.sexo  || null;
 
                     // Suma 4 pliegues Durnin: bíceps+tríceps+subescapular+cresta_iliaca
                     const b4 = parseFloat(extra.biceps) || 0;
@@ -957,13 +989,14 @@
                             </div>
                             <div class="bg-white rounded-lg p-2.5 border border-stone-100">
                                 <span class="text-gray-400 block">Talla</span>
-                                <strong class="text-stone-800 text-sm">${ev.talla ? ev.talla + ' cm' : 'N/A'}</strong>
+                                <strong class="text-stone-800 text-sm">${tallaMostrar ? tallaMostrar + ' cm' : 'N/A'}</strong>
+                                ${!ev.talla && tallaMostrar ? '<div class="text-gray-400" style="font-size:9px;">ref. perfil</div>' : ''}
                             </div>
                             <div class="bg-white rounded-lg p-2.5 border border-stone-100">
                                 <span class="text-gray-400 block">IMC</span>
-                                <strong class="text-stone-800 text-sm">${ev.talla ? calc.imc : 'N/A'}</strong>
-                                ${ev.talla ? `<div class="mt-1"><span class="preview-cat ${imcCat.clase}" style="font-size:9px;padding:1px 6px;border-radius:99px;font-weight:700;">${imcCat.texto}</span></div>` : ''}
-                                ${deltaIMC !== null && ev.talla ? `<div class="mt-0.5 text-xs">${formatDelta(deltaIMC, '')}</div>` : ''}
+                                <strong class="text-stone-800 text-sm">${tallaMostrar ? calc.imc : 'N/A'}</strong>
+                                ${tallaMostrar ? `<div class="mt-1"><span class="preview-cat ${imcCat.clase}" style="font-size:9px;padding:1px 6px;border-radius:99px;font-weight:700;">${imcCat.texto}</span></div>` : ''}
+                                ${deltaIMC !== null && tallaMostrar ? `<div class="mt-0.5 text-xs">${formatDelta(deltaIMC, '')}</div>` : ''}
                             </div>
                             <div class="bg-white rounded-lg p-2.5 border border-stone-100">
                                 <span class="text-gray-400 block">${suma4 > 0 ? 'Suma 4 (Durnin)' : 'Suma 6 Pliegues'}</span>
