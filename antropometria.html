@@ -1171,17 +1171,29 @@
             });
 
             // Poblar selects con alumnas actuales
-            supabaseClient.from('pt_alumnos').select('id,nombre').order('nombre').then(({ data }) => {
+            supabaseClient.from('pt_alumnos').select('id,nombre').order('nombre').then(({ data: alumnos }) => {
                 document.querySelectorAll('.import-alumna-sel').forEach(sel => {
-                    (data || []).forEach(al => {
+                    const idx = parseInt(sel.dataset.idx);
+                    const evNombre = (evals[idx]?.nombre_alumna || '').trim();
+                    let autoMatch = false;
+
+                    (alumnos || []).forEach(al => {
                         const opt = document.createElement('option');
                         opt.value = al.id;
                         opt.textContent = al.nombre;
-                        // Autoseleccionar si el nombre coincide
-                        const evNombre = (evals[parseInt(sel.dataset.idx)]?.nombre_alumna || '').toLowerCase();
-                        if (al.nombre.toLowerCase().includes(evNombre.split(' ')[0]) && evNombre) opt.selected = true;
+                        const coincide = evNombre && al.nombre.toLowerCase().includes(evNombre.split(' ')[0].toLowerCase());
+                        if (coincide) { opt.selected = true; autoMatch = true; }
                         sel.appendChild(opt);
                     });
+
+                    // Si no hubo coincidencia y hay nombre detectado, ofrecer crear
+                    if (!autoMatch && evNombre) {
+                        const opt = document.createElement('option');
+                        opt.value = '__nuevo__';
+                        opt.textContent = `➕ Crear nuevo: ${evNombre}`;
+                        opt.selected = true;
+                        sel.appendChild(opt);
+                    }
                 });
             });
 
@@ -1193,9 +1205,32 @@
             const filas = [];
             let errores = 0;
 
+            // Primero crear alumnos nuevos y resolver sus IDs
+            const alumnoIdMap = {}; // idx → id resuelto
+            for (let i = 0; i < sels.length; i++) {
+                const sel = sels[i];
+                if (!sel.value) { errores++; continue; }
+                if (sel.value === '__nuevo__') {
+                    const nombre = importarPendientes[i]?.nombre_alumna || 'Sin nombre';
+                    const { data: nuevo, error: errNuevo } = await supabaseClient
+                        .from('pt_alumnos')
+                        .insert([{ nombre, entrenadora_id: usuarioActual.id }])
+                        .select('id').single();
+                    if (errNuevo) { errores++; continue; }
+                    alumnoIdMap[i] = nuevo.id;
+                } else {
+                    alumnoIdMap[i] = sel.value;
+                }
+            }
+
+            if (errores > 0) {
+                document.getElementById('import-status').textContent = `⚠ ${errores} fila(s) sin alumna asignada o con error al crear.`;
+                return;
+            }
+
             sels.forEach((sel, i) => {
-                const alumno_id = sel.value;
-                if (!alumno_id) { errores++; return; }
+                const alumno_id = alumnoIdMap[i];
+                if (!alumno_id) return;
                 const ev = importarPendientes[i];
                 const extra_data = {
                     biceps: ev.biceps, cresta_iliaca: ev.cresta_iliaca,
@@ -1223,10 +1258,6 @@
                 });
             });
 
-            if (errores > 0) {
-                document.getElementById('import-status').textContent = `⚠ Asigna alumna a las ${errores} filas pendientes.`;
-                return;
-            }
             if (filas.length === 0) {
                 document.getElementById('import-status').textContent = '⚠ No hay evaluaciones para guardar.';
                 return;
