@@ -999,15 +999,17 @@
             document.getElementById('import-texto').value = '';
             document.getElementById('import-archivo').value = '';
             document.getElementById('import-imagen').value = '';
+            document.getElementById('import-pdf').value = '';
             document.getElementById('import-preview').classList.add('hidden');
             document.getElementById('import-status').textContent = '';
             importarPendientes = [];
         }
 
         // Tabs
-        ['texto','excel','imagen'].forEach(tab => {
+        const IMPORT_TABS = ['texto','excel','imagen','pdf'];
+        IMPORT_TABS.forEach(tab => {
             document.getElementById(`import-tab-${tab}`).addEventListener('click', () => {
-                ['texto','excel','imagen'].forEach(t => {
+                IMPORT_TABS.forEach(t => {
                     document.getElementById(`import-tab-${t}`).classList.toggle('bg-[#4a3e3d]', t === tab);
                     document.getElementById(`import-tab-${t}`).classList.toggle('text-white', t === tab);
                     document.getElementById(`import-tab-${t}`).classList.toggle('bg-stone-100', t !== tab);
@@ -1028,35 +1030,50 @@
             try {
                 const activeTab = document.querySelector('[id^="import-tab-"].bg-\\[\\#4a3e3d\\]')?.id?.replace('import-tab-','') || 'texto';
 
-                let payload;
+                let payloads = [];
 
                 if (activeTab === 'texto') {
                     const texto = document.getElementById('import-texto').value.trim();
                     if (!texto) throw new Error('Escribe o pega el texto primero.');
-                    payload = { tipo: 'texto', contenido: texto };
+                    payloads = [{ tipo: 'texto', contenido: texto }];
 
                 } else if (activeTab === 'excel') {
                     const file = document.getElementById('import-archivo').files[0];
                     if (!file) throw new Error('Selecciona un archivo Excel o CSV.');
                     const texto = await leerExcelComoTexto(file);
-                    payload = { tipo: 'texto', contenido: texto };
+                    payloads = [{ tipo: 'texto', contenido: texto }];
 
                 } else if (activeTab === 'imagen') {
                     const file = document.getElementById('import-imagen').files[0];
                     if (!file) throw new Error('Selecciona una imagen.');
                     const base64 = await fileToBase64(file);
-                    payload = { tipo: 'imagen_base64', contenido: base64 };
+                    payloads = [{ tipo: 'imagen_base64', contenido: base64 }];
+
+                } else if (activeTab === 'pdf') {
+                    const file = document.getElementById('import-pdf').files[0];
+                    if (!file) throw new Error('Selecciona un archivo PDF.');
+                    btn.textContent = 'Procesando PDF...';
+                    payloads = await procesarPDF(file);
                 }
 
-                const res = await fetch(IMPORT_FUNCTION_URL, {
-                    method: 'POST',
-                    headers: { 'apikey': IMPORT_ANON_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
-                const data = await res.json();
+                // Llamar la función por cada payload (puede ser varias páginas de PDF)
+                const todasEvals = [];
+                for (let i = 0; i < payloads.length; i++) {
+                    if (payloads.length > 1) btn.textContent = `Analizando página ${i+1}/${payloads.length}...`;
+                    const res = await fetch(IMPORT_FUNCTION_URL, {
+                        method: 'POST',
+                        headers: { 'apikey': IMPORT_ANON_KEY, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payloads[i]),
+                    });
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error);
+                    todasEvals.push(...(data.evaluaciones || []));
+                }
+                const data = { evaluaciones: todasEvals };
                 if (data.error) throw new Error(data.error);
 
-                importarPendientes = data.evaluaciones;
+                importarPendientes = data.evaluaciones.filter(e => e && Object.values(e).some(v => v !== null));
+                if (importarPendientes.length === 0) throw new Error('No se detectaron datos antropométricos.');
                 mostrarPreviewImport(importarPendientes);
 
             } catch (e) {
@@ -1074,6 +1091,38 @@
                 reader.onerror = rej;
                 reader.readAsDataURL(file);
             });
+        }
+
+        async function procesarPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfjsLib = window['pdfjs-dist/build/pdf'];
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const payloads = [];
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+
+                // Intentar extraer texto primero
+                const textContent = await page.getTextContent();
+                const texto = textContent.items.map(i => i.str).join(' ').trim();
+
+                if (texto.length > 50) {
+                    // PDF con texto legible
+                    payloads.push({ tipo: 'texto', contenido: texto });
+                } else {
+                    // PDF escaneado → renderizar como imagen
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                    const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+                    payloads.push({ tipo: 'imagen_base64', contenido: base64 });
+                }
+            }
+            return payloads;
         }
 
         async function leerExcelComoTexto(file) {
@@ -1211,10 +1260,11 @@
             </div>
             <div class="p-6 space-y-5">
                 <!-- Tabs -->
-                <div class="flex gap-2">
+                <div class="flex gap-2 flex-wrap">
                     <button id="import-tab-texto" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-[#4a3e3d] text-white">Texto / Pegado</button>
                     <button id="import-tab-excel" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-stone-100 text-stone-600">Excel / CSV</button>
                     <button id="import-tab-imagen" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-stone-100 text-stone-600">Imagen / Foto</button>
+                    <button id="import-tab-pdf" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-stone-100 text-stone-600">PDF</button>
                 </div>
                 <!-- Panel Texto -->
                 <div id="import-panel-texto">
@@ -1226,6 +1276,12 @@
                     <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube un archivo Excel (.xlsx) o CSV</label>
                     <input type="file" id="import-archivo" accept=".xlsx,.xls,.csv" class="w-full text-sm border rounded-lg p-3 file:mr-3 file:text-xs file:bg-[#b08b82] file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:font-semibold">
                     <p class="text-xs text-stone-400 mt-2">La IA interpretará las columnas automáticamente, sin importar el orden o los nombres de las cabeceras.</p>
+                </div>
+                <!-- Panel PDF -->
+                <div id="import-panel-pdf" class="hidden">
+                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube un archivo PDF</label>
+                    <input type="file" id="import-pdf" accept=".pdf" class="w-full text-sm border rounded-lg p-3 file:mr-3 file:text-xs file:bg-[#b08b82] file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:font-semibold">
+                    <p class="text-xs text-stone-400 mt-2">Funciona con PDFs de texto (planillas digitales) y PDFs escaneados. Si es escaneado, cada página se convierte en imagen y la IA la analiza.</p>
                 </div>
                 <!-- Panel Imagen -->
                 <div id="import-panel-imagen" class="hidden">
@@ -1264,5 +1320,7 @@
 
     <!-- SheetJS para Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- PDF.js para PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </body>
 </html>
