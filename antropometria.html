@@ -296,6 +296,75 @@
         <p>&copy; 2026 PattyTrainer. Todos los derechos reservados.</p>
     </footer>
 
+    <!-- MODAL EDITAR EVALUACIÓN -->
+    <div id="modal-editar-ev" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-5 border-b border-stone-100">
+                <h2 class="text-lg font-serif text-[#4a3e3d] font-semibold">Editar Evaluación</h2>
+                <button id="modal-editar-ev-close" class="text-stone-400 hover:text-stone-600 text-2xl leading-none">&times;</button>
+            </div>
+            <form id="form-editar-ev" class="p-5 space-y-4">
+                <input type="hidden" id="edit-ev-id">
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-xs text-stone-500 font-semibold block mb-1">Fecha</label>
+                        <input type="date" id="edit-ev-fecha" class="w-full border border-stone-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b08b82]">
+                    </div>
+                    <div>
+                        <label class="text-xs text-stone-500 font-semibold block mb-1">Peso (kg)</label>
+                        <input type="number" step="0.1" id="edit-ev-peso" class="w-full border border-stone-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b08b82]">
+                    </div>
+                    <div>
+                        <label class="text-xs text-stone-500 font-semibold block mb-1">Talla (cm)</label>
+                        <input type="number" step="0.1" id="edit-ev-talla" placeholder="ej. 170" class="w-full border border-stone-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b08b82]">
+                    </div>
+                    <div>
+                        <label class="text-xs text-stone-500 font-semibold block mb-1">Edad</label>
+                        <input type="number" id="edit-ev-edad" class="w-full border border-stone-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b08b82]">
+                    </div>
+                    <div>
+                        <label class="text-xs text-stone-500 font-semibold block mb-1">Sexo</label>
+                        <select id="edit-ev-sexo" class="w-full border border-stone-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b08b82]">
+                            <option value="femenino">Femenino</option>
+                            <option value="masculino">Masculino</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-stone-500 font-semibold block mb-1">% Grasa registrado</label>
+                        <input type="number" step="0.01" id="edit-ev-pct-grasa" class="w-full border border-stone-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b08b82]">
+                    </div>
+                </div>
+                <details class="border border-stone-100 rounded-xl">
+                    <summary class="text-xs font-bold text-[#b08b82] uppercase px-3 py-2 cursor-pointer">Pliegues (mm)</summary>
+                    <div class="grid grid-cols-3 gap-3 p-3">
+                        <div><label class="text-xs text-stone-500 block mb-1">Tríceps</label><input type="number" step="0.1" id="edit-ev-triceps" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Subescapular</label><input type="number" step="0.1" id="edit-ev-subescapular" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Bíceps</label><input type="number" step="0.1" id="edit-ev-biceps" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Cresta Ilíaca</label><input type="number" step="0.1" id="edit-ev-cresta" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Supraespinal</label><input type="number" step="0.1" id="edit-ev-supraespinal" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Abdominal</label><input type="number" step="0.1" id="edit-ev-abdominal" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Muslo</label><input type="number" step="0.1" id="edit-ev-muslo" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Pantorrilla</label><input type="number" step="0.1" id="edit-ev-pantorrilla" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                    </div>
+                </details>
+                <details class="border border-stone-100 rounded-xl">
+                    <summary class="text-xs font-bold text-[#b08b82] uppercase px-3 py-2 cursor-pointer">Perímetros (cm)</summary>
+                    <div class="grid grid-cols-3 gap-3 p-3">
+                        <div><label class="text-xs text-stone-500 block mb-1">Cintura</label><input type="number" step="0.1" id="edit-ev-p-cintura" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Cadera</label><input type="number" step="0.1" id="edit-ev-p-cadera" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Brazo Rel.</label><input type="number" step="0.1" id="edit-ev-p-brazo-rel" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Brazo Flex.</label><input type="number" step="0.1" id="edit-ev-p-brazo-flex" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                        <div><label class="text-xs text-stone-500 block mb-1">Pantorrilla</label><input type="number" step="0.1" id="edit-ev-p-pantorrilla" class="w-full border border-stone-200 rounded-lg px-2 py-1 text-sm"></div>
+                    </div>
+                </details>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" id="modal-editar-ev-cancel" class="text-sm px-4 py-2 border border-stone-200 rounded-lg hover:bg-stone-50 transition">Cancelar</button>
+                    <button type="submit" class="text-sm px-5 py-2 bg-[#4a3e3d] text-white rounded-lg hover:bg-[#3a2e2d] transition font-semibold">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL IMPORTAR -->
     <div id="modal-importar" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -822,6 +891,9 @@
                         <div class="flex justify-between items-center border-b pb-2 flex-wrap gap-2">
                             <span class="font-serif text-lg text-[#4a3e3d] font-semibold">Evaluación del ${fechaFmt}</span>
                             <div class="flex items-center gap-2 flex-wrap">
+                                <button onclick="abrirEditarEvaluacion('${ev.id}')" class="text-xs text-stone-500 hover:text-stone-700 bg-stone-100 hover:bg-stone-200 px-2 py-1 rounded transition">
+                                    ✏️ Editar
+                                </button>
                                 <button onclick="confirmarEliminarEvaluacion('${ev.id}')" class="text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition">
                                     Borrar Reg.
                                 </button>
@@ -933,6 +1005,80 @@
                 }
             );
         }
+
+        // ── EDITAR EVALUACIÓN ──
+        let _evEditandoExtraData = {};
+
+        function abrirEditarEvaluacion(evId) {
+            supabaseClient.from('pt_evaluaciones').select('*').eq('id', evId).single().then(({ data: ev }) => {
+                if (!ev) return;
+                const extra = ev.extra_data || {};
+                _evEditandoExtraData = extra;
+                document.getElementById('edit-ev-id').value          = ev.id;
+                document.getElementById('edit-ev-fecha').value        = ev.fecha || '';
+                document.getElementById('edit-ev-peso').value         = ev.peso || '';
+                document.getElementById('edit-ev-talla').value        = ev.talla || '';
+                document.getElementById('edit-ev-edad').value         = ev.edad || '';
+                document.getElementById('edit-ev-sexo').value         = ev.sexo || 'femenino';
+                document.getElementById('edit-ev-pct-grasa').value    = ev.pct_grasa || '';
+                document.getElementById('edit-ev-triceps').value      = ev.triceps || '';
+                document.getElementById('edit-ev-subescapular').value = ev.subescapular || '';
+                document.getElementById('edit-ev-supraespinal').value = ev.supraespinal || '';
+                document.getElementById('edit-ev-abdominal').value    = ev.abdominal || '';
+                document.getElementById('edit-ev-muslo').value        = ev.muslo || '';
+                document.getElementById('edit-ev-pantorrilla').value  = ev.pantorrilla || '';
+                document.getElementById('edit-ev-biceps').value       = extra.biceps || '';
+                document.getElementById('edit-ev-cresta').value       = extra.cresta_iliaca || '';
+                document.getElementById('edit-ev-p-cintura').value    = extra.p_cintura || '';
+                document.getElementById('edit-ev-p-cadera').value     = extra.p_cadera || '';
+                document.getElementById('edit-ev-p-brazo-rel').value  = extra.p_brazo_rel || '';
+                document.getElementById('edit-ev-p-brazo-flex').value = extra.p_brazo_flex || '';
+                document.getElementById('edit-ev-p-pantorrilla').value= extra.p_pantorrilla || '';
+                document.getElementById('modal-editar-ev').classList.remove('hidden');
+            });
+        }
+
+        document.getElementById('modal-editar-ev-close').addEventListener('click', () => document.getElementById('modal-editar-ev').classList.add('hidden'));
+        document.getElementById('modal-editar-ev-cancel').addEventListener('click', () => document.getElementById('modal-editar-ev').classList.add('hidden'));
+
+        document.getElementById('form-editar-ev').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const evId = document.getElementById('edit-ev-id').value;
+            const v = (id) => { const val = parseFloat(document.getElementById(id).value); return isNaN(val) ? null : val; };
+            const newExtra = { ..._evEditandoExtraData };
+            const biceps = v('edit-ev-biceps'); if (biceps !== null) newExtra.biceps = biceps; else delete newExtra.biceps;
+            const cresta = v('edit-ev-cresta'); if (cresta !== null) newExtra.cresta_iliaca = cresta; else delete newExtra.cresta_iliaca;
+            const pCintura = v('edit-ev-p-cintura'); if (pCintura !== null) newExtra.p_cintura = pCintura; else delete newExtra.p_cintura;
+            const pCadera = v('edit-ev-p-cadera'); if (pCadera !== null) newExtra.p_cadera = pCadera; else delete newExtra.p_cadera;
+            const pBrazoRel = v('edit-ev-p-brazo-rel'); if (pBrazoRel !== null) newExtra.p_brazo_rel = pBrazoRel; else delete newExtra.p_brazo_rel;
+            const pBrazoFlex = v('edit-ev-p-brazo-flex'); if (pBrazoFlex !== null) newExtra.p_brazo_flex = pBrazoFlex; else delete newExtra.p_brazo_flex;
+            const pPantorrilla = v('edit-ev-p-pantorrilla'); if (pPantorrilla !== null) newExtra.p_pantorrilla = pPantorrilla; else delete newExtra.p_pantorrilla;
+
+            const updates = {
+                fecha:        document.getElementById('edit-ev-fecha').value || null,
+                peso:         v('edit-ev-peso'),
+                talla:        v('edit-ev-talla'),
+                edad:         v('edit-ev-edad'),
+                sexo:         document.getElementById('edit-ev-sexo').value,
+                pct_grasa:    v('edit-ev-pct-grasa'),
+                triceps:      v('edit-ev-triceps'),
+                subescapular: v('edit-ev-subescapular'),
+                supraespinal: v('edit-ev-supraespinal'),
+                abdominal:    v('edit-ev-abdominal'),
+                muslo:        v('edit-ev-muslo'),
+                pantorrilla:  v('edit-ev-pantorrilla'),
+                extra_data:   newExtra,
+            };
+
+            const { error } = await supabaseClient.from('pt_evaluaciones').update(updates).eq('id', evId);
+            if (error) {
+                mostrarToast('Error al guardar: ' + error.message, 'error');
+            } else {
+                document.getElementById('modal-editar-ev').classList.add('hidden');
+                mostrarToast('Evaluación actualizada ✓', 'success');
+                cargarHistorialEvaluaciones();
+            }
+        });
 
         // ── GRÁFICO ──
         function dibujarGrafica(labels, pesoData, grasaData, suma6Data) {
