@@ -680,8 +680,10 @@
                 res.suma8 = parseFloat(s8.toFixed(1));
             }
 
-            if ([raw.biceps, raw.triceps, raw.subescapular, raw.supraespinal].every(v => v > 0)) {
-                const suma4 = raw.biceps + raw.triceps + raw.subescapular + raw.supraespinal;
+            // Durnin usa suprailiaco; aceptar cresta_iliaca como equivalente si no hay supraespinal
+            const suprailiacDW = raw.supraespinal > 0 ? raw.supraespinal : (raw.cresta_iliaca > 0 ? raw.cresta_iliaca : 0);
+            if ([raw.biceps, raw.triceps, raw.subescapular, suprailiacDW].every(v => v > 0)) {
+                const suma4 = raw.biceps + raw.triceps + raw.subescapular + suprailiacDW;
                 const logS4 = Math.log10(suma4);
                 let dDW = 0;
                 if (sexo === 'femenino') {
