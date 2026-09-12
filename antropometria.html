@@ -296,6 +296,67 @@
         <p>&copy; 2026 PattyTrainer. Todos los derechos reservados.</p>
     </footer>
 
+    <!-- MODAL IMPORTAR -->
+    <div id="modal-importar" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-stone-100">
+                <h2 class="text-xl font-serif text-[#4a3e3d] font-semibold">Importar Evaluaciones Históricas</h2>
+                <button id="modal-importar-close" class="text-stone-400 hover:text-stone-600 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="flex gap-2 flex-wrap">
+                    <button id="import-tab-texto" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition">Texto / Pegado</button>
+                    <button id="import-tab-excel" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition">Excel / CSV</button>
+                    <button id="import-tab-imagen" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition">Imagen / Foto</button>
+                    <button id="import-tab-pdf" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition">PDF</button>
+                </div>
+                <div id="import-panel-texto">
+                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Pega texto, tabla, mensaje, etc.</label>
+                    <textarea id="import-texto" rows="6" placeholder="Ej: María, 15/03/2024, peso 62kg, talla 165cm, tríceps 14mm..." class="w-full text-sm border rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-[#c2a69f] resize-none"></textarea>
+                </div>
+                <div id="import-panel-excel" class="hidden">
+                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube un archivo Excel (.xlsx) o CSV</label>
+                    <input type="file" id="import-archivo" accept=".xlsx,.xls,.csv" class="w-full text-sm border rounded-lg p-3">
+                    <p class="text-xs text-stone-400 mt-2">La IA interpretará las columnas automáticamente.</p>
+                </div>
+                <div id="import-panel-pdf" class="hidden">
+                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube un archivo PDF</label>
+                    <input type="file" id="import-pdf" accept=".pdf" class="w-full text-sm border rounded-lg p-3">
+                    <p class="text-xs text-stone-400 mt-2">Funciona con PDFs digitales y escaneados.</p>
+                </div>
+                <div id="import-panel-imagen" class="hidden">
+                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube una foto o imagen</label>
+                    <input type="file" id="import-imagen" accept="image/*" class="w-full text-sm border rounded-lg p-3">
+                    <p class="text-xs text-stone-400 mt-2">Foto de planilla en papel, captura de pantalla, etc.</p>
+                </div>
+                <button id="btn-import-analizar" class="w-full bg-[#4a3e3d] text-white text-sm font-semibold py-3 rounded-lg hover:bg-[#5c4e4d] transition uppercase tracking-wider">
+                    Analizar con IA
+                </button>
+                <p id="import-status" class="text-xs text-red-500 text-center"></p>
+                <div id="import-preview" class="hidden">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">Datos detectados — asigna cada evaluación a una alumna:</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead class="bg-stone-50">
+                                <tr class="text-left text-stone-500 uppercase text-xs">
+                                    <th class="py-2 px-3">Nombre detectado</th>
+                                    <th class="py-2 px-3">Fecha</th>
+                                    <th class="py-2 px-3">Peso</th>
+                                    <th class="py-2 px-3">Pliegues</th>
+                                    <th class="py-2 px-3">Alumna en sistema</th>
+                                </tr>
+                            </thead>
+                            <tbody id="import-preview-tbody"></tbody>
+                        </table>
+                    </div>
+                    <button id="btn-import-confirmar" class="mt-4 w-full bg-green-700 text-white text-sm font-semibold py-3 rounded-lg hover:bg-green-800 transition uppercase tracking-wider">
+                        Confirmar y Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ── SUPABASE ──
         const SUPABASE_URL = "https://supabase.saidcoach.com";
@@ -1293,73 +1354,6 @@
         });
 
     </script>
-
-    <!-- MODAL IMPORTAR -->
-    <div id="modal-importar" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center p-6 border-b border-stone-100">
-                <h2 class="text-xl font-serif text-[#4a3e3d] font-semibold">Importar Evaluaciones Históricas</h2>
-                <button id="modal-importar-close" class="text-stone-400 hover:text-stone-600 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 space-y-5">
-                <!-- Tabs -->
-                <div class="flex gap-2 flex-wrap">
-                    <button id="import-tab-texto" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-[#4a3e3d] text-white">Texto / Pegado</button>
-                    <button id="import-tab-excel" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-stone-100 text-stone-600">Excel / CSV</button>
-                    <button id="import-tab-imagen" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-stone-100 text-stone-600">Imagen / Foto</button>
-                    <button id="import-tab-pdf" class="flex-1 text-xs font-semibold py-2 px-3 rounded-lg transition bg-stone-100 text-stone-600">PDF</button>
-                </div>
-                <!-- Panel Texto -->
-                <div id="import-panel-texto">
-                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Pega texto, tabla, mensaje, etc.</label>
-                    <textarea id="import-texto" rows="6" placeholder="Ej: María, 15/03/2024, peso 62kg, talla 165cm, tríceps 14mm, subescapular 12mm..." class="w-full text-sm border rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-[#c2a69f] resize-none"></textarea>
-                </div>
-                <!-- Panel Excel -->
-                <div id="import-panel-excel" class="hidden">
-                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube un archivo Excel (.xlsx) o CSV</label>
-                    <input type="file" id="import-archivo" accept=".xlsx,.xls,.csv" class="w-full text-sm border rounded-lg p-3 file:mr-3 file:text-xs file:bg-[#b08b82] file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:font-semibold">
-                    <p class="text-xs text-stone-400 mt-2">La IA interpretará las columnas automáticamente, sin importar el orden o los nombres de las cabeceras.</p>
-                </div>
-                <!-- Panel PDF -->
-                <div id="import-panel-pdf" class="hidden">
-                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube un archivo PDF</label>
-                    <input type="file" id="import-pdf" accept=".pdf" class="w-full text-sm border rounded-lg p-3 file:mr-3 file:text-xs file:bg-[#b08b82] file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:font-semibold">
-                    <p class="text-xs text-stone-400 mt-2">Funciona con PDFs de texto (planillas digitales) y PDFs escaneados. Si es escaneado, cada página se convierte en imagen y la IA la analiza.</p>
-                </div>
-                <!-- Panel Imagen -->
-                <div id="import-panel-imagen" class="hidden">
-                    <label class="block text-xs font-semibold text-stone-600 mb-2 uppercase">Sube una foto de planilla en papel</label>
-                    <input type="file" id="import-imagen" accept="image/*" class="w-full text-sm border rounded-lg p-3 file:mr-3 file:text-xs file:bg-[#b08b82] file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:font-semibold">
-                    <p class="text-xs text-stone-400 mt-2">Funciona con fotos de planillas, escaneos o capturas de pantalla. Puedes subir varias evaluaciones en una sola imagen.</p>
-                </div>
-                <button id="btn-import-analizar" class="w-full bg-[#4a3e3d] text-white text-sm font-semibold py-3 rounded-lg hover:bg-[#5c4e4d] transition uppercase tracking-wider">
-                    Analizar con IA
-                </button>
-                <p id="import-status" class="text-xs text-red-500 text-center"></p>
-                <!-- Preview -->
-                <div id="import-preview" class="hidden">
-                    <h3 class="text-sm font-semibold text-stone-700 mb-3">Datos detectados — asigna cada evaluación a una alumna:</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-xs">
-                            <thead class="bg-stone-50">
-                                <tr class="text-left text-stone-500 uppercase text-xs">
-                                    <th class="py-2 px-3">Nombre detectado</th>
-                                    <th class="py-2 px-3">Fecha</th>
-                                    <th class="py-2 px-3">Peso</th>
-                                    <th class="py-2 px-3">Pliegues</th>
-                                    <th class="py-2 px-3">Alumna en sistema</th>
-                                </tr>
-                            </thead>
-                            <tbody id="import-preview-tbody"></tbody>
-                        </table>
-                    </div>
-                    <button id="btn-import-confirmar" class="mt-4 w-full bg-green-700 text-white text-sm font-semibold py-3 rounded-lg hover:bg-green-800 transition uppercase tracking-wider">
-                        Confirmar y Guardar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- SheetJS para Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
