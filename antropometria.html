@@ -1278,19 +1278,27 @@
             const filas = [];
             let errores = 0;
 
-            // Primero crear alumnos nuevos y resolver sus IDs
+            // Primero crear alumnos nuevos — un solo INSERT por nombre único
             const alumnoIdMap = {}; // idx → id resuelto
+            const nombresCreados = {}; // nombre → id ya creado (evita duplicados)
+
             for (let i = 0; i < sels.length; i++) {
                 const sel = sels[i];
                 if (!sel.value) { errores++; continue; }
                 if (sel.value === '__nuevo__') {
                     const nombre = importarPendientes[i]?.nombre_alumna || 'Sin nombre';
-                    const { data: nuevo, error: errNuevo } = await supabaseClient
-                        .from('pt_alumnos')
-                        .insert([{ nombre, entrenadora_id: usuarioActual.id }])
-                        .select('id').single();
-                    if (errNuevo) { errores++; continue; }
-                    alumnoIdMap[i] = nuevo.id;
+                    if (nombresCreados[nombre]) {
+                        // Ya creado en una iteración anterior → reutilizar ID
+                        alumnoIdMap[i] = nombresCreados[nombre];
+                    } else {
+                        const { data: nuevo, error: errNuevo } = await supabaseClient
+                            .from('pt_alumnos')
+                            .insert([{ nombre, entrenadora_id: usuarioActual.id }])
+                            .select('id').single();
+                        if (errNuevo) { errores++; continue; }
+                        nombresCreados[nombre] = nuevo.id;
+                        alumnoIdMap[i] = nuevo.id;
+                    }
                 } else {
                     alumnoIdMap[i] = sel.value;
                 }
